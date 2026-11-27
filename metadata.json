@@ -1,0 +1,6 @@
+{
+  "name": "Zenttaar Enterprises",
+  "description": "Luxury custom streetwear and apparel manufacturing in Sialkot — heavyweight hoodies, private label cut & sew, custom tech-pack execution, and global bulk orders.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
