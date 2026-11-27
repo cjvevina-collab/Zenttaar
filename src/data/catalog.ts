@@ -29,6 +29,7 @@ export interface GarmentProduct {
   colorways: ColorwayOption[];
   techniques: string[];
   sizes: string[];
+  sortOrder?: number;
 }
 
 export interface BannerSlide {
@@ -52,8 +53,9 @@ export interface ProductionVideo {
   summary: string;
   posterImage: string;
   fallbackPoster: string;
-  videoUrl: string | null;
+  videoUrl: string;
   specs: string[];
+  sortOrder?: number;
 }
 
 export interface TestimonialItem {
@@ -64,6 +66,7 @@ export interface TestimonialItem {
   location: string;
   orderMetric: string;
   quote: string;
+  sortOrder?: number;
 }
 
 export interface FaqItem {
@@ -87,6 +90,49 @@ export interface InquiryItem {
   isCustomBuild?: boolean;
 }
 
+export interface SiteSettingsPublic {
+  brandName: string;
+  domain: string;
+  websiteUrl: string;
+  logoUrl: string;
+  backgroundUrl: string;
+  address: string;
+  email: string;
+  phone: string;
+  whatsappNumber: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  tiktokUrl: string;
+  youtubeUrl: string;
+}
+
+export interface SiteSettingsBanking {
+  bankName: string;
+  accountTitle: string;
+  accountNumber: string;
+  iban: string;
+  swiftCode: string;
+  branchAddress: string;
+  paymentNotes: string;
+}
+
+export interface InquiryRecord {
+  docId: string;
+  refId: string;
+  source: 'contact_form' | 'inquiry_bag';
+  name: string;
+  brandName?: string;
+  email: string;
+  phone?: string;
+  category?: string;
+  quantity?: string;
+  techPackUrl?: string;
+  message?: string;
+  itemsSummary?: string;
+  status: 'pending' | 'reviewed' | 'quoted' | 'archived';
+  createdAt?: unknown;
+}
+
 export type PageRoute =
   | 'home'
   | 'shop'
@@ -98,24 +144,39 @@ export type PageRoute =
   | 'contact'
   | 'privacy'
   | 'terms'
-  | 'returns';
+  | 'returns'
+  | 'admin';
 
-export const BRAND_INFO = {
-  name: 'Zenttaar Enterprises',
+export const DEFAULT_SITE_SETTINGS: SiteSettingsPublic = {
+  brandName: 'Zenttaar Enterprises',
   domain: 'zenttaarenterprises.store',
   websiteUrl: 'http://zenttaarenterprises.store/',
   logoUrl: 'https://i.postimg.cc/J40Cmb4P/Zenttaar-Enterprises-Luxury-Apparel-Logo.png',
   backgroundUrl: 'https://i.postimg.cc/66YTYLmP/Whats-App-Image-2026-11-26-at-11-41-11-PM.jpg',
-  fallbackBackdrop: '/src/assets/images/hero_atelier_backdrop_1795766290321.jpg',
   address: 'Factory Area, Shahab Pora Road, Sialkot',
   email: 'rayyanmughal188717@gmail.com',
   phone: '123456789',
   whatsappNumber: '123456789',
-  instagramHandle: '@zenttarenterprises',
   instagramUrl: 'https://instagram.com/zenttarenterprises',
-  facebookUrl: '#facebook',
-  tiktokUrl: '#tiktok',
-  youtubeUrl: '#youtube',
+  facebookUrl: 'https://facebook.com/',
+  tiktokUrl: 'https://tiktok.com/',
+  youtubeUrl: 'https://youtube.com/',
+};
+
+export const DEFAULT_BANKING_SETTINGS: SiteSettingsBanking = {
+  bankName: 'Bank Name (Configure in Admin)',
+  accountTitle: 'Zenttaar Enterprises',
+  accountNumber: '0000-0000-0000-00',
+  iban: 'PK00XXXX0000000000000000',
+  swiftCode: 'XXXXXXXX',
+  branchAddress: 'Shahab Pora Road, Sialkot',
+  paymentNotes: '50% deposit to initiate production, 50% balance prior to DHL/cargo dispatch.',
+};
+
+export const BRAND_INFO = {
+  ...DEFAULT_SITE_SETTINGS,
+  fallbackBackdrop: '/src/assets/images/hero_atelier_backdrop_1795766290321.jpg',
+  instagramHandle: '@zenttarenterprises',
 };
 
 export const BANNER_SLIDES: BannerSlide[] = [
@@ -124,7 +185,7 @@ export const BANNER_SLIDES: BannerSlide[] = [
     kicker: 'Sialkot Export Manufacturing · OEM & Private Label',
     headline: 'Heavyweight Luxury Hoodies Built From Your Tech Pack',
     subheadline:
-      'From 480 GSM brushed fleece milling to precision 3D puff print and multi-head embroidery — engineered for global streetwear labels.',
+      '480–550 GSM fleece milling, 3D puff print, and multi-head embroidery for global streetwear labels.',
     ctaPrimary: 'Custom Production',
     targetPage: 'custom-order',
     image: BRAND_INFO.backgroundUrl,
@@ -136,7 +197,7 @@ export const BANNER_SLIDES: BannerSlide[] = [
     kicker: 'Cut & Sew Atelier · Zero Compromise Craft',
     headline: 'Sharp Colorways, Acid Washes & Signature Silhouette Grading',
     subheadline:
-      'Submit sketches, moodboards, or physical samples. Our pattern masters produce graded pre-production samples in 14 days.',
+      'Submit sketches or reference garments. Graded pre-production samples dispatched in 14 days.',
     ctaPrimary: 'Browse Full Shop',
     targetPage: 'shop',
     image: '/src/assets/images/hero_atelier_backdrop_1795766290321.jpg',
@@ -148,7 +209,7 @@ export const BANNER_SLIDES: BannerSlide[] = [
     kicker: 'Full-Package Apparel Production · Worldwide Dispatch',
     headline: 'High-Density Embroidery, Silicone Transfers & Custom Hardware',
     subheadline:
-      'Complete private labeling with custom woven neck tags, engraved metal aglets, branded zip pulls, and retail-ready packaging.',
+      'Custom woven neck tags, engraved metal aglets, branded zip pulls, and retail packaging.',
     ctaPrimary: 'Request Bulk Quote',
     targetPage: 'contact',
     image: '/src/assets/images/atelier_embroidery_craft_1795766292456.jpg',
@@ -184,7 +245,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     tag: 'Signature Cut',
     description:
-      'Boxy architectural silhouette featuring a double-layered self-lined hood, clean no-drawstring neckline option, and dense 2x2 ribbed cuffs built for luxury streetwear labels.',
+      'Boxy architectural silhouette with a double-layered self-lined hood and dense 2x2 ribbed cuffs.',
     colorways: [
       { name: 'Obsidian Black', hex: '#141418' },
       { name: 'Burnished Amber', hex: '#D97706' },
@@ -193,6 +254,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     techniques: ['3D Puff Print', 'High-Density Screen', 'Chain-Stitch Embroidery', 'Woven Label'],
     sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+    sortOrder: 1,
   },
   {
     id: 'zen-hoodie-02',
@@ -220,7 +282,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     tag: 'Custom Wash',
     description:
-      'Garment-dyed and stone-enzyme washed for an authentic sun-faded patina. Engineered to hold oversized cracked screen prints, chenille appliqués, or heavy metallic embroidery.',
+      'Garment-dyed and stone-enzyme washed for an authentic patina built for puff prints and chenille.',
     colorways: [
       { name: 'Washed Slate', hex: '#27272A' },
       { name: 'Royal Cobalt', hex: '#2563EB' },
@@ -229,6 +291,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     techniques: ['Acid / Enzyme Wash', 'Chenille Patch', 'Cracked Plastisol', 'Distressed Hem'],
     sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+    sortOrder: 2,
   },
   {
     id: 'zen-hoodie-03',
@@ -256,7 +319,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     tag: '550 GSM Heavy',
     description:
-      'Our flagship heavyweight luxury blank designed for statement graphic releases. Structured drape that holds shape effortlessly, paired with custom embossed hardware and neck branding.',
+      'Flagship heavyweight luxury blank engineered for statement drops and embossed hardware.',
     colorways: [
       { name: 'Pitch Onyx', hex: '#09090B' },
       { name: 'Imperial Gold', hex: '#CA8A04' },
@@ -265,6 +328,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     techniques: ['3D Silicone Transfer', 'Multi-Head Embroidery', 'Rhinestone Studs', 'Custom Aglets'],
     sizes: ['S', 'M', 'L', 'XL', '2XL'],
+    sortOrder: 3,
   },
   {
     id: 'zen-set-04',
@@ -291,7 +355,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     tag: '2-Piece Set',
     description:
-      'Coordinated boxy hoodie and wide-leg cuffed or open-hem fleece joggers. Delivered with custom silicone-dipped drawstrings, tonal embroidery, and matched dye-lot consistency.',
+      'Coordinated boxy hoodie and wide-leg fleece joggers with matched dye-lot consistency.',
     colorways: [
       { name: 'Charcoal Obsidian', hex: '#18181B' },
       { name: 'Cobalt Electric', hex: '#1D4ED8' },
@@ -300,6 +364,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     techniques: ['Tonal Satin Stitch', 'High-Density Print', 'Custom Zip Pulls', 'Branded Waistband'],
     sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+    sortOrder: 4,
   },
   {
     id: 'zen-outer-05',
@@ -326,7 +391,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     tag: 'Cut & Sew Outerwear',
     description:
-      'Crafted in Sialkot using premium Melton wool and supple full-grain leather sleeves. Supports custom chenille lettering, direct chain-stitching, and custom dyed snap buttons.',
+      'Crafted in Sialkot using Melton wool, cowhide sleeves, and custom chenille cresting.',
     colorways: [
       { name: 'Black / Onyx Leather', hex: '#09090B' },
       { name: 'Crimson / Cream', hex: '#991B1B' },
@@ -334,6 +399,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     techniques: ['Chenille Appliqué', 'Chain-Stitch', 'Embossed Snaps', 'Quilted Jacquard Lining'],
     sizes: ['S', 'M', 'L', 'XL', '2XL'],
+    sortOrder: 5,
   },
   {
     id: 'zen-blank-06',
@@ -360,7 +426,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     tag: 'Private Label',
     description:
-      'Engineered with a two-way heavy metal zipper, cropped boxy proportions, and split kangaroo pockets. Ready for full private-label transformation with custom care and neck labels.',
+      'Two-way heavy metal zipper with cropped boxy proportions ready for private-label drops.',
     colorways: [
       { name: 'Midnight Black', hex: '#111115' },
       { name: 'Crimson Flame', hex: '#DC2626' },
@@ -369,6 +435,7 @@ export const GARMENTS: GarmentProduct[] = [
     ],
     techniques: ['Two-Way Custom Zip', 'Puff Screen Print', 'Subtle Chest Embroidery', 'Acid Wash'],
     sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+    sortOrder: 6,
   },
 ];
 
@@ -376,67 +443,86 @@ export const PRODUCTION_VIDEOS: ProductionVideo[] = [
   {
     id: 'vid-01',
     step: '01',
-    title: 'Heavyweight Fleece Milling & GSM Calibration',
-    duration: '01:15',
+    title: 'Heavyweight Fleece Milling & Fabric Inspection',
+    duration: '00:45',
     department: 'Fabric Knitting & Dye House',
     summary:
-      'Every production run begins in our Sialkot partner mills—testing yarn twist, shrinkage tolerance under 3%, and exact 380–620 GSM density before cutting.',
+      'Testing combed cotton yarn density, shrinkage control, and custom dye batches before cutting.',
     posterImage: BRAND_INFO.backgroundUrl,
     fallbackPoster: '/src/assets/images/hero_atelier_backdrop_1795766290321.jpg',
-    videoUrl: null,
+    videoUrl: 'https://sportzfy.mtyofficial.online/WhatsApp%20Video%202026-11-27%20at%2012.42.53%20AM%20(1).mp4',
     specs: ['Ring-Spun Combed Cotton', 'Pantone Custom Dye Lots', 'Pre-Shrunk Sanforized Finish'],
+    sortOrder: 1,
   },
   {
     id: 'vid-02',
     step: '02',
-    title: 'CAD Pattern Grading & Precision Laser Cutting',
-    duration: '01:40',
-    department: 'Pattern Studio & Cutting Floor',
+    title: 'CAD Pattern Grading & Precision Cutting Floor',
+    duration: '00:52',
+    department: 'Pattern Studio & Cutting',
     summary:
-      'Your tech pack is digitized into graded size runs (XS–3XL) with zero-variance drop-shoulder tolerances and matched grain alignment.',
+      'Digitized size runs from XS to 3XL with drop-shoulder tolerances and matched grain alignment.',
     posterImage: '/src/assets/images/hoodie_heavyweight_obsidian_1795766290801.jpg',
     fallbackPoster: '/src/assets/images/hoodie_heavyweight_obsidian_1795766290801.jpg',
-    videoUrl: null,
+    videoUrl: 'https://sportzfy.mtyofficial.online/WhatsApp%20Video%202026-11-27%20at%2012.42.53%20AM%20(2).mp4',
     specs: ['Custom Silhouette Patterns', 'Size Grading XS to 3XL', 'Zero-Waste Nesting'],
+    sortOrder: 2,
   },
   {
     id: 'vid-03',
     step: '03',
-    title: 'Multi-Head Gold Embroidery & Chenille Craft',
-    duration: '01:28',
+    title: 'Multi-Head Embroidery & Chenille Craft',
+    duration: '00:48',
     department: 'Embellishment Atelier',
     summary:
-      'High-speed Japanese Tajima multi-head embroidery, dense chenille patches, and 3D satin-stitch crests executed with crisp edge registration.',
+      'High-speed multi-head embroidery, chenille crests, and precision satin-stitch detailing.',
     posterImage: '/src/assets/images/atelier_embroidery_craft_1795766292456.jpg',
     fallbackPoster: '/src/assets/images/atelier_embroidery_craft_1795766292456.jpg',
-    videoUrl: null,
-    specs: ['Metallic & Matte Threads', 'Chenille & Felt Appliqué', 'High-Stitch Count Density'],
+    videoUrl: 'https://sportzfy.mtyofficial.online/WhatsApp%20Video%202026-11-27%20at%2012.42.54%20AM%20(1).mp4',
+    specs: ['Metallic & Matte Threads', 'Chenille & Felt Appliqué', 'High-Stitch Density'],
+    sortOrder: 3,
   },
   {
     id: 'vid-04',
     step: '04',
-    title: '3D Puff Printing, Silicone & Enzyme Washing',
-    duration: '01:52',
-    department: 'Screen Print & Wash Lab',
+    title: '3D Puff Printing & Screen Craftsmanship',
+    duration: '00:55',
+    department: 'Print & Wash Lab',
     summary:
-      'Raised puff plastisol, crackle vintage inks, high-density silicone transfers, and controlled enzyme or acid baths for unmistakable retail depth.',
+      'Raised puff plastisol, crackle vintage inks, and high-density silicone transfers.',
     posterImage: 'https://i.postimg.cc/N0CBRpMs/Whats-App-Image-2026-11-27-at-12-42-55-AM-(1).jpg',
     fallbackPoster: '/src/assets/images/hoodie_crimson_streetwear_1795766291867.jpg',
-    videoUrl: null,
+    videoUrl: 'https://sportzfy.mtyofficial.online/WhatsApp%20Video%202026-11-27%20at%2012.42.54%20AM%20(2).mp4',
     specs: ['Multi-Pass Puff Inks', 'Vintage Acid & Sun Fade', 'Wash-Fastness Tested'],
+    sortOrder: 4,
   },
   {
     id: 'vid-05',
     step: '05',
-    title: 'Private Label Finishing, QC & Global Dispatch',
-    duration: '01:08',
+    title: 'Cut & Sew Assembly & Heavy Coverstitch',
+    duration: '00:50',
+    department: 'Stitching Line',
+    summary:
+      'Reinforced double-needle coverstitching, kangaroo bar-tacks, and clean seam finishing.',
+    posterImage: 'https://i.postimg.cc/3wfY2nRY/Whats-App-Image-2026-11-27-at-12-42-56-AM.jpg',
+    fallbackPoster: '/src/assets/images/hoodie_heavyweight_obsidian_1795766290801.jpg',
+    videoUrl: 'https://sportzfy.mtyofficial.online/WhatsApp%20Video%202026-11-27%20at%2012.42.54%20AM.mp4',
+    specs: ['Double-Needle Coverstitch', 'Custom Woven Tags', 'Bar-Tack Reinforcement'],
+    sortOrder: 5,
+  },
+  {
+    id: 'vid-06',
+    step: '06',
+    title: 'Final Quality Audit & Export Packaging',
+    duration: '00:44',
     department: 'Quality Assurance & Export',
     summary:
-      '100% garment measurement audit, custom woven neck & care labels, frosted zip-lock brand polybags, and tracked air freight worldwide.',
+      'Measurement checks, custom frosted zip-lock polybags, and tracked air freight dispatch.',
     posterImage: '/src/assets/images/apparel_varsity_tracksuit_1795766291516.jpg',
     fallbackPoster: '/src/assets/images/apparel_varsity_tracksuit_1795766291516.jpg',
-    videoUrl: null,
-    specs: ['AQL 2.5 Final Inspection', 'Custom Woven & Hang Tags', 'DHL / FedEx / Air Cargo'],
+    videoUrl: 'https://sportzfy.mtyofficial.online/WhatsApp%20Video%202026-11-27%20at%2012.42.55%20AM.mp4',
+    specs: ['AQL 2.5 Inspection', 'Custom Hang Tags', 'DHL / Air Cargo'],
+    sortOrder: 6,
   },
 ];
 
@@ -449,7 +535,8 @@ export const TESTIMONIALS: TestimonialItem[] = [
     location: 'London, UK',
     orderMetric: '1,400 Heavyweight Hoodies · 3 Drops',
     quote:
-      'Before switching to Zenttaar Enterprises, we struggled with inconsistent GSM and cracked puff prints across suppliers. Their Sialkot pattern team nailed our 520 GSM boxy block on the first sample, and every bulk unit arrived retail-ready.',
+      'Zenttaar nailed our 520 GSM boxy block on the first sample, and every bulk unit arrived retail-ready.',
+    sortOrder: 1,
   },
   {
     id: 'rev-02',
@@ -459,7 +546,8 @@ export const TESTIMONIALS: TestimonialItem[] = [
     location: 'Dubai, UAE',
     orderMetric: '950 Custom Tracksuits · 21-Day Turnaround',
     quote:
-      'We sent a rough tech pack and Pantone references—Zenttaar handled custom fabric dyeing, engraved metal aglets, and multi-head embroidery. Our launch collection sold out in 72 hours with zero quality returns.',
+      'We sent a rough tech pack and Pantone references—our launch collection sold out in 72 hours with zero quality returns.',
+    sortOrder: 2,
   },
   {
     id: 'rev-03',
@@ -469,7 +557,8 @@ export const TESTIMONIALS: TestimonialItem[] = [
     location: 'Berlin, Germany',
     orderMetric: '600 Enzyme-Wash Hoodies · 0.4% Defect Rate',
     quote:
-      'Their enzyme-wash lab produces that authentic archival fade without weakening the cotton fleece. Communication from Shahab Pora factory floor updates to DHL airway bills was transparent at every stage.',
+      'Their enzyme-wash lab produces that authentic archival fade without weakening the cotton fleece.',
+    sortOrder: 3,
   },
   {
     id: 'rev-04',
@@ -479,7 +568,8 @@ export const TESTIMONIALS: TestimonialItem[] = [
     location: 'Toronto, Canada',
     orderMetric: '2,200 Units · Hoodies & Varsity Outerwear',
     quote:
-      'Scaling from 50-piece test runs to 1,000+ unit seasonal drops was seamless. Zenttaar Enterprises builds garments with real luxury weight and stitch discipline you rarely see outside flagship European ateliers.',
+      'Scaling from 50-piece test runs to 1,000+ unit seasonal drops was seamless with real luxury stitch discipline.',
+    sortOrder: 4,
   },
   {
     id: 'rev-05',
@@ -489,7 +579,8 @@ export const TESTIMONIALS: TestimonialItem[] = [
     location: 'Tokyo, Japan',
     orderMetric: '400 Wool-Leather Varsities · Custom Chenille',
     quote:
-      'Every chenille crest, Melton wool panel, and quilted satin lining matched our strict Tokyo retail spec. We rely on Zenttaar as our primary cut-and-sew partner for heavyweight outerwear.',
+      'Every chenille crest, Melton wool panel, and quilted satin lining matched our strict Tokyo retail spec.',
+    sortOrder: 5,
   },
 ];
 
@@ -497,31 +588,31 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: 'What is your Minimum Order Quantity (MOQ) for custom hoodies and streetwear?',
     answer:
-      'Our standard MOQ starts at 50 pieces per style/colorway for hoodies, tracksuits, and custom blanks, and 35 pieces for Melton wool & leather varsity jackets. Mixed size grading (XS through 2XL or 3XL) is included within your MOQ.',
+      'Our standard MOQ starts at 50 pieces per style/colorway for hoodies, tracksuits, and custom blanks, and 35 pieces for Melton wool & leather varsity jackets.',
   },
   {
     question: 'Can I order a pre-production sample before committing to bulk manufacturing?',
     answer:
-      'Yes. We strongly recommend a physical pre-production sample. Once your tech pack or artwork is finalized, our Sialkot sample room produces and dispatches your custom graded sample within 12–14 business days via DHL Express.',
+      'Yes. Once your tech pack or artwork is finalized, our Sialkot sample room produces and dispatches your custom graded sample within 12–14 business days via DHL Express.',
   },
   {
     question: 'Do I need a full CAD tech pack, or can you work from sketches and reference photos?',
     answer:
-      'While CAD tech packs speed up development, you can also send rough sketches, Adobe Illustrator files, or reference garment photos. Our pattern masters will convert your concepts into measurement specs and digital mockups for approval.',
+      'You can send rough sketches, Illustrator files, or reference photos. Our pattern masters convert your concepts into graded measurement specs for approval.',
   },
   {
-    question: 'What printing, embroidery, and custom wash techniques do you offer in-house?',
+    question: 'What printing, embroidery, and custom wash techniques do you offer?',
     answer:
-      'We operate in-house 3D puff screen printing, high-density silicone transfers, vintage crackle plastisol, Tajima multi-head embroidery, chenille & chain-stitch patchwork, rhinestone applications, and enzyme/acid-wash dye baths.',
+      'We operate in-house 3D puff screen printing, high-density silicone transfers, vintage crackle ink, multi-head embroidery, chenille patchwork, and enzyme/acid-wash dye baths.',
   },
   {
     question: 'Do you provide private-label woven neck labels, hang tags, and custom packaging?',
     answer:
-      'Yes. Every bulk order can be customized with high-density damask woven neck labels, satin care tags, embossed hang tags, engraved metal aglets, custom YKK zipper pulls, and frosted branded zip-lock polybags.',
+      'Yes. Every bulk order can include damask woven neck labels, satin care tags, embossed hang tags, engraved metal aglets, and frosted branded zip-lock polybags.',
   },
   {
-    question: 'How do shipping, customs clearance, and global delivery work from Sialkot?',
+    question: 'How do shipping and global delivery work from Sialkot?',
     answer:
-      'We ship door-to-door worldwide (USA, UK, EU, UAE, Canada, Australia, Japan) via DHL Express, FedEx Priority, UPS Air Cargo, or sea freight for large container shipments, complete with commercial invoices and packing lists.',
+      'We ship door-to-door worldwide via DHL Express, FedEx Priority, UPS Air Cargo, or sea freight, complete with commercial invoices and packing lists.',
   },
 ];

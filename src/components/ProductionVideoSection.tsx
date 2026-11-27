@@ -1,29 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { Play, Pause, Film, Check } from 'lucide-react';
-import { PRODUCTION_VIDEOS } from '../data/catalog';
+import { ProductionVideo } from '../data/catalog';
 import { ResilientImage } from './ResilientImage';
 
-export const ProductionVideoSection: React.FC = () => {
+interface ProductionVideoSectionProps {
+  videos: ProductionVideo[];
+}
+
+export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
+  videos,
+}) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [reelProgress, setReelProgress] = useState(0);
   const shouldReduceMotion = useReducedMotion();
 
-  const currentVideo = PRODUCTION_VIDEOS[activeIdx];
+  const safeIdx = activeIdx < videos.length ? activeIdx : 0;
+  const currentVideo = videos[safeIdx];
 
   useEffect(() => {
     setReelProgress(0);
     setIsPlaying(false);
-  }, [activeIdx]);
+  }, [safeIdx]);
 
   useEffect(() => {
-    if (!isPlaying || currentVideo.videoUrl) return;
+    if (!currentVideo || !isPlaying || currentVideo.videoUrl) return;
     const interval = setInterval(() => {
       setReelProgress((prev) => (prev >= 100 ? 0 : prev + 1.5));
     }, 120);
     return () => clearInterval(interval);
-  }, [isPlaying, currentVideo.videoUrl]);
+  }, [isPlaying, currentVideo]);
+
+  if (!currentVideo) return null;
 
   return (
     <section id="production" className="relative border-t border-zinc-800/80 py-14 sm:py-20">
@@ -44,7 +53,7 @@ export const ProductionVideoSection: React.FC = () => {
             </h2>
           </div>
           <p className="max-w-md text-sm text-zinc-400">
-            Five production stages from raw fleece milling to final export audit.
+            Real production reels from fleece milling to final export quality check.
           </p>
         </motion.div>
 
@@ -56,10 +65,11 @@ export const ProductionVideoSection: React.FC = () => {
                 <video
                   key={currentVideo.videoUrl}
                   src={currentVideo.videoUrl}
-                  poster={currentVideo.posterImage}
+                  poster={currentVideo.posterImage || currentVideo.fallbackPoster}
                   controls
-                  autoPlay={isPlaying}
-                  className="h-full w-full object-cover"
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-contain bg-black"
                 />
               ) : (
                 <>
@@ -100,37 +110,39 @@ export const ProductionVideoSection: React.FC = () => {
               )}
             </div>
 
-            <div className="flex-1 p-5 sm:p-7 flex flex-col justify-between">
+            <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between">
               <div>
                 <h3 className="font-display text-lg sm:text-xl font-bold text-white">
                   {currentVideo.step}. {currentVideo.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-300">
+                <p className="mt-1.5 text-sm leading-relaxed text-zinc-300">
                   {currentVideo.summary}
                 </p>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-zinc-800 pt-4 text-xs text-zinc-300">
-                {currentVideo.specs.map((spec) => (
-                  <span key={spec} className="inline-flex items-center gap-1.5">
-                    <Check className="h-3.5 w-3.5 text-amber-400" />
-                    <span>{spec}</span>
-                  </span>
-                ))}
-              </div>
+              {currentVideo.specs?.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-zinc-800 pt-3.5 text-xs text-zinc-300">
+                  {currentVideo.specs.map((spec) => (
+                    <span key={spec} className="inline-flex items-center gap-1.5">
+                      <Check className="h-3.5 w-3.5 text-amber-400" />
+                      <span>{spec}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* 5 Video Reel Chapters */}
-          <div className="lg:col-span-5 flex flex-col gap-2.5">
-            {PRODUCTION_VIDEOS.map((video, index) => {
-              const isActive = index === activeIdx;
+          {/* Video Reel Chapters */}
+          <div className="lg:col-span-5 flex flex-col gap-2.5 max-h-[540px] lg:overflow-y-auto pr-0.5">
+            {videos.map((video, index) => {
+              const isActive = index === safeIdx;
               return (
                 <button
                   key={video.id}
                   type="button"
                   onClick={() => setActiveIdx(index)}
-                  className={`group flex items-center gap-3.5 rounded-xl border p-3 text-left transition-all duration-150 cursor-pointer ${
+                  className={`group flex items-center gap-3.5 rounded-xl border p-3 text-left transition-all duration-150 cursor-pointer shrink-0 ${
                     isActive
                       ? 'border-amber-500 bg-amber-500/10'
                       : 'border-zinc-800/90 bg-[#0d0d12]/80 hover:border-zinc-700'

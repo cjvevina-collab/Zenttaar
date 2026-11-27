@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Trash2, Plus, Minus, Mail, CheckCircle2, Copy } from 'lucide-react';
-import { BRAND_INFO, InquiryItem } from '../data/catalog';
+import { InquiryItem, SiteSettingsPublic } from '../data/catalog';
+import { submitPublicInquiry } from '../services/firestoreService';
 import { ResilientImage } from './ResilientImage';
 
 interface InquiryDrawerProps {
@@ -10,6 +11,7 @@ interface InquiryDrawerProps {
   onUpdateQty: (uid: string, delta: number) => void;
   onRemoveItem: (uid: string) => void;
   onClearItems: () => void;
+  siteSettings: SiteSettingsPublic;
 }
 
 export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
@@ -19,11 +21,13 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
   onUpdateQty,
   onRemoveItem,
   onClearItems,
+  siteSettings,
 }) => {
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [formError, setFormError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -42,12 +46,12 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
           item.customNotes ? ` | Notes: ${item.customNotes}` : ''
         }`
     );
-    return `Zenttaar Enterprises Bulk Inquiry [${refId}]\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nTotal Units: ${totalUnits}\n\nItems:\n${lines.join(
+    return `${siteSettings.brandName} Bulk Inquiry [${refId}]\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nTotal Units: ${totalUnits}\n\nItems:\n${lines.join(
       '\n'
     )}`;
   };
 
-  const handleSubmitInquiry = (e: React.FormEvent) => {
+  const handleSubmitInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
@@ -68,7 +72,23 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
     }
 
     const refId = `ZEN-BAG-${Math.floor(1000 + Math.random() * 9000)}`;
-    setSubmittedRef(refId);
+    setSubmitting(true);
+    try {
+      await submitPublicInquiry({
+        refId,
+        source: 'inquiry_bag',
+        name: clientName,
+        email: clientEmail,
+        phone: clientPhone,
+        quantity: `${totalUnits} total units`,
+        itemsSummary: buildSummaryText(refId),
+      });
+    } catch (err) {
+      console.warn('Firestore inquiry bag log fallback:', err);
+    } finally {
+      setSubmitting(false);
+      setSubmittedRef(refId);
+    }
   };
 
   const handleCopyBrief = () => {
@@ -115,18 +135,18 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
               <p className="mt-1 text-xs font-display text-amber-400">Ref: {submittedRef}</p>
               <p className="mt-2 text-sm text-zinc-300">
                 Your {items.length}-item manufacturing brief ({totalUnits} total units) is ready for{' '}
-                {BRAND_INFO.name}.
+                {siteSettings.brandName}.
               </p>
 
               <div className="mt-5 flex flex-col gap-2.5">
                 <a
-                  href={`mailto:${BRAND_INFO.email}?subject=${encodeURIComponent(
+                  href={`mailto:${siteSettings.email}?subject=${encodeURIComponent(
                     `Bulk Inquiry Bag [${submittedRef}] - ${clientName}`
                   )}&body=${encodeURIComponent(buildSummaryText(submittedRef))}`}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-zinc-950 hover:bg-amber-400"
                 >
                   <Mail className="h-4 w-4" />
-                  <span>Send Brief to {BRAND_INFO.email}</span>
+                  <span>Send Brief to {siteSettings.email}</span>
                 </a>
 
                 <button
@@ -290,9 +310,10 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-amber-500 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-400 transition-colors cursor-pointer"
+              disabled={submitting}
+              className="w-full rounded-lg bg-amber-500 px-4 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-400 disabled:opacity-60 transition-colors cursor-pointer"
             >
-              Submit Bulk Quote Inquiry
+              {submitting ? 'Submitting Inquiry...' : 'Submit Bulk Quote Inquiry'}
             </button>
           </form>
         )}

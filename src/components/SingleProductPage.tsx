@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Check, Plus, SlidersHorizontal } from 'lucide-react';
-import { GARMENTS, GarmentProduct } from '../data/catalog';
+import { GarmentProduct } from '../data/catalog';
 import { ResilientImage } from './ResilientImage';
 
 interface SingleProductPageProps {
   product: GarmentProduct;
+  allProducts: GarmentProduct[];
   onBackToShop: () => void;
   onSelectProduct: (productId: string) => void;
   onAddToInquiry: (
@@ -28,14 +29,32 @@ const SIZE_CHART = [
 
 export const SingleProductPage: React.FC<SingleProductPageProps> = ({
   product,
+  allProducts,
   onBackToShop,
   onSelectProduct,
   onAddToInquiry,
   onCustomizeProduct,
 }) => {
+  const safeColors =
+    product.colorways?.length > 0
+      ? product.colorways
+      : [{ name: 'Obsidian Black', hex: '#141418' }];
+  const safeTechs =
+    product.techniques?.length > 0 ? product.techniques : ['3D Puff Print'];
+  const safeTiers =
+    product.priceTiers?.length >= 3
+      ? product.priceTiers
+      : [
+          { range: `${product.moq}+ pcs`, price: product.basePrice || 22 },
+          { range: '100+ pcs', price: product.basePrice || 20 },
+          { range: '250+ pcs', price: product.basePrice || 18 },
+        ];
+  const safeGallery =
+    product.gallery?.length > 0 ? product.gallery : [product.image];
+
   const [activeImageIdx, setActiveImageIdx] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(product.colorways[0].name);
-  const [selectedTech, setSelectedTech] = useState(product.techniques[0]);
+  const [selectedColor, setSelectedColor] = useState(safeColors[0].name);
+  const [selectedTech, setSelectedTech] = useState(safeTechs[0]);
   const [quantity, setQuantity] = useState(product.moq);
   const [notes, setNotes] = useState('');
   const [added, setAdded] = useState(false);
@@ -43,8 +62,8 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
 
   React.useEffect(() => {
     setActiveImageIdx(0);
-    setSelectedColor(product.colorways[0].name);
-    setSelectedTech(product.techniques[0]);
+    setSelectedColor(safeColors[0].name);
+    setSelectedTech(safeTechs[0]);
     setQuantity(product.moq);
     setNotes('');
     setAdded(false);
@@ -52,10 +71,10 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
 
   const activeTier =
     quantity >= 250
-      ? product.priceTiers[2]
+      ? safeTiers[2]
       : quantity >= 100
-      ? product.priceTiers[1]
-      : product.priceTiers[0];
+      ? safeTiers[1]
+      : safeTiers[0];
 
   const handleAdd = () => {
     onAddToInquiry(product, selectedColor, selectedTech, quantity, notes);
@@ -63,7 +82,7 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
     setTimeout(() => setAdded(false), 1800);
   };
 
-  const related = GARMENTS.filter((g) => g.id !== product.id).slice(0, 3);
+  const related = allProducts.filter((g) => g.id !== product.id).slice(0, 3);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -98,7 +117,7 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
         >
           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
             <ResilientImage
-              src={product.gallery[activeImageIdx] || product.image}
+              src={safeGallery[activeImageIdx] || product.image}
               fallbackSrc={product.fallbackImage}
               alt={product.name}
               loading="eager"
@@ -107,7 +126,7 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            {product.gallery.map((imgUrl, idx) => (
+            {safeGallery.map((imgUrl, idx) => (
               <button
                 key={imgUrl + idx}
                 type="button"
@@ -160,7 +179,7 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
               Wholesale Pricing Tiers
             </div>
             <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2.5">
-              {product.priceTiers.map((tier) => {
+              {safeTiers.map((tier) => {
                 const isSelected = activeTier.range === tier.range;
                 return (
                   <div
@@ -210,7 +229,7 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
               Colorway: <span className="text-amber-400 font-semibold">{selectedColor}</span>
             </label>
             <div className="mt-2.5 flex flex-wrap gap-2">
-              {product.colorways.map((color) => (
+              {safeColors.map((color) => (
                 <button
                   key={color.name}
                   type="button"
@@ -237,7 +256,7 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
               Embellishment Option
             </label>
             <div className="mt-2 flex flex-wrap gap-2">
-              {product.techniques.map((tech) => (
+              {safeTechs.map((tech) => (
                 <button
                   key={tech}
                   type="button"

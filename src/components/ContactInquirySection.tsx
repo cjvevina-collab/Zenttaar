@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { Mail, MapPin, Phone, Globe, CheckCircle2, Send, Instagram } from 'lucide-react';
-import { BRAND_INFO } from '../data/catalog';
+import { SiteSettingsPublic } from '../data/catalog';
+import { submitPublicInquiry } from '../services/firestoreService';
 
-export const ContactInquirySection: React.FC = () => {
+interface ContactInquirySectionProps {
+  siteSettings: SiteSettingsPublic;
+}
+
+export const ContactInquirySection: React.FC<ContactInquirySectionProps> = ({
+  siteSettings,
+}) => {
   const [name, setName] = useState('');
   const [brandName, setBrandName] = useState('');
   const [email, setEmail] = useState('');
@@ -13,10 +20,11 @@ export const ContactInquirySection: React.FC = () => {
   const [techPackUrl, setTechPackUrl] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -32,7 +40,26 @@ export const ContactInquirySection: React.FC = () => {
     }
 
     const refId = `ZEN-${Math.floor(10000 + Math.random() * 90000)}`;
-    setSubmittedRef(refId);
+    setSubmitting(true);
+    try {
+      await submitPublicInquiry({
+        refId,
+        source: 'contact_form',
+        name,
+        brandName,
+        email,
+        phone,
+        category,
+        quantity,
+        techPackUrl,
+        message,
+      });
+    } catch (err) {
+      console.warn('Firestore inquiry log fallback:', err);
+    } finally {
+      setSubmitting(false);
+      setSubmittedRef(refId);
+    }
   };
 
   return (
@@ -55,7 +82,7 @@ export const ContactInquirySection: React.FC = () => {
                 Start a Bulk Order
               </h1>
               <p className="mt-2.5 text-sm leading-relaxed text-zinc-400">
-                Share your tech pack or garment concept. Our Sialkot factory desk responds within 12 hours with lead times and quotes.
+                Share your tech pack or garment concept. Our Sialkot factory desk responds within 12 hours.
               </p>
             </div>
 
@@ -64,7 +91,7 @@ export const ContactInquirySection: React.FC = () => {
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
                 <div>
                   <div className="text-xs font-medium text-zinc-400">Factory Address</div>
-                  <div className="mt-0.5 text-sm font-medium text-white">{BRAND_INFO.address}</div>
+                  <div className="mt-0.5 text-sm font-medium text-white">{siteSettings.address}</div>
                 </div>
               </div>
 
@@ -73,10 +100,10 @@ export const ContactInquirySection: React.FC = () => {
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-zinc-400">Production Email</div>
                   <a
-                    href={`mailto:${BRAND_INFO.email}`}
+                    href={`mailto:${siteSettings.email}`}
                     className="mt-0.5 block text-sm font-medium text-white hover:text-amber-400 transition-colors break-all"
                   >
-                    {BRAND_INFO.email}
+                    {siteSettings.email}
                   </a>
                 </div>
               </div>
@@ -86,10 +113,10 @@ export const ContactInquirySection: React.FC = () => {
                 <div>
                   <div className="text-xs font-medium text-zinc-400">Phone / WhatsApp</div>
                   <a
-                    href={`tel:${BRAND_INFO.phone}`}
+                    href={`tel:${siteSettings.phone}`}
                     className="mt-0.5 block font-display tabular-nums text-sm font-medium text-white hover:text-amber-400 transition-colors"
                   >
-                    {BRAND_INFO.phone}
+                    {siteSettings.phone}
                   </a>
                 </div>
               </div>
@@ -99,12 +126,12 @@ export const ContactInquirySection: React.FC = () => {
                 <div>
                   <div className="text-xs font-medium text-zinc-400">Website</div>
                   <a
-                    href={BRAND_INFO.websiteUrl}
+                    href={siteSettings.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-0.5 block text-sm font-medium text-white hover:text-amber-400 transition-colors"
                   >
-                    {BRAND_INFO.domain}
+                    {siteSettings.domain}
                   </a>
                 </div>
               </div>
@@ -113,7 +140,7 @@ export const ContactInquirySection: React.FC = () => {
                 <div className="text-xs font-medium text-zinc-400 mb-2.5">Social Channels</div>
                 <div className="flex items-center gap-2.5">
                   <a
-                    href={BRAND_INFO.instagramUrl}
+                    href={siteSettings.instagramUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram"
@@ -122,7 +149,9 @@ export const ContactInquirySection: React.FC = () => {
                     <Instagram className="h-4 w-4" />
                   </a>
                   <a
-                    href={BRAND_INFO.facebookUrl}
+                    href={siteSettings.facebookUrl || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label="Facebook"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-400 transition-colors"
                   >
@@ -131,12 +160,26 @@ export const ContactInquirySection: React.FC = () => {
                     </svg>
                   </a>
                   <a
-                    href={BRAND_INFO.tiktokUrl}
+                    href={siteSettings.tiktokUrl || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label="TikTok"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-400 transition-colors"
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                    </svg>
+                  </a>
+                  <a
+                    href={siteSettings.youtubeUrl || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="YouTube"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-400 transition-colors"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+                      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
                     </svg>
                   </a>
                 </div>
@@ -170,7 +213,7 @@ export const ContactInquirySection: React.FC = () => {
 
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
                   <a
-                    href={`mailto:${BRAND_INFO.email}?subject=${encodeURIComponent(
+                    href={`mailto:${siteSettings.email}?subject=${encodeURIComponent(
                       `Bulk Inquiry [${submittedRef}] - ${brandName || name}`
                     )}&body=${encodeURIComponent(
                       `Name: ${name}\nBrand: ${brandName}\nEmail: ${email}\nPhone: ${phone}\nCategory: ${category}\nQuantity: ${quantity}\nTech Pack Link: ${techPackUrl}\n\nDetails:\n${message}`
@@ -328,10 +371,11 @@ export const ContactInquirySection: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-6 py-3.5 text-sm font-semibold text-zinc-950 hover:bg-amber-400 active:scale-[0.99] transition-all cursor-pointer"
+                  disabled={submitting}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-6 py-3.5 text-sm font-semibold text-zinc-950 hover:bg-amber-400 disabled:opacity-60 active:scale-[0.99] transition-all cursor-pointer"
                 >
                   <Send className="h-4 w-4" />
-                  <span>Request Manufacturing Quote</span>
+                  <span>{submitting ? 'Submitting Inquiry...' : 'Request Manufacturing Quote'}</span>
                 </button>
               </form>
             )}

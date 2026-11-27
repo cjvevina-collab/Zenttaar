@@ -6,6 +6,7 @@ import { ResilientImage } from './ResilientImage';
 
 interface HeroBannerSliderProps {
   onNavigate: (page: PageRoute) => void;
+  backgroundUrl?: string;
 }
 
 const STATS = [
@@ -15,7 +16,10 @@ const STATS = [
   { value: '35+ Countries', label: 'Global Dispatch' },
 ];
 
-export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ onNavigate }) => {
+export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
+  onNavigate,
+  backgroundUrl,
+}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const shouldReduceMotion = useReducedMotion();
@@ -29,6 +33,8 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ onNavigate }
   }, [paused]);
 
   const currentSlide = BANNER_SLIDES[activeIndex];
+  const slideImage =
+    activeIndex === 0 && backgroundUrl ? backgroundUrl : currentSlide.image;
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length);
@@ -55,7 +61,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({ onNavigate }
             className="absolute inset-0"
           >
             <ResilientImage
-              src={currentSlide.image}
+              src={slideImage}
               fallbackSrc={currentSlide.fallbackImage}
               alt={currentSlide.headline}
               loading="eager"

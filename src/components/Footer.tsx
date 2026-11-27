@@ -1,11 +1,13 @@
 import React from 'react';
-import { BRAND_INFO, PageRoute } from '../data/catalog';
+import { Lock } from 'lucide-react';
+import { PageRoute, SiteSettingsPublic } from '../data/catalog';
 
 interface FooterProps {
   onNavigate: (page: PageRoute) => void;
+  siteSettings: SiteSettingsPublic;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, siteSettings }) => {
   return (
     <footer className="border-t border-zinc-800/90 bg-[#050507] py-12 sm:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -15,12 +17,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <button
               type="button"
               onClick={() => onNavigate('home')}
-              aria-label={BRAND_INFO.name}
+              aria-label={siteSettings.brandName}
               className="inline-block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
             >
               <img
-                src={BRAND_INFO.logoUrl}
-                alt={BRAND_INFO.name}
+                src={siteSettings.logoUrl}
+                alt={siteSettings.brandName}
                 referrerPolicy="no-referrer"
                 className="h-16 sm:h-20 w-auto object-contain"
               />
@@ -33,7 +35,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             {/* Clean Social Media Icon Buttons Only */}
             <div className="flex items-center gap-3 pt-1">
               <a
-                href={BRAND_INFO.instagramUrl}
+                href={siteSettings.instagramUrl || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -47,7 +49,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </a>
 
               <a
-                href={BRAND_INFO.facebookUrl}
+                href={siteSettings.facebookUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="Facebook"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-400 transition-colors"
               >
@@ -57,7 +61,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </a>
 
               <a
-                href={BRAND_INFO.tiktokUrl}
+                href={siteSettings.tiktokUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="TikTok"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-400 transition-colors"
               >
@@ -67,7 +73,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </a>
 
               <a
-                href={BRAND_INFO.youtubeUrl}
+                href={siteSettings.youtubeUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="YouTube"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-amber-500 hover:text-amber-400 transition-colors"
               >
@@ -147,22 +155,32 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Sialkot Factory Contact */}
           <div className="md:col-span-3 space-y-2.5 text-xs text-zinc-400">
             <div className="font-semibold text-zinc-200">Manufacturing Hub</div>
-            <p className="leading-relaxed">{BRAND_INFO.address}</p>
+            <p className="leading-relaxed">{siteSettings.address}</p>
             <p>
               <a
-                href={`mailto:${BRAND_INFO.email}`}
+                href={`mailto:${siteSettings.email}`}
                 className="text-zinc-200 hover:text-amber-400 transition-colors break-all"
               >
-                {BRAND_INFO.email}
+                {siteSettings.email}
               </a>
             </p>
-            <p className="tabular-nums text-zinc-200">{BRAND_INFO.phone}</p>
+            <p className="tabular-nums text-zinc-200">{siteSettings.phone}</p>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-zinc-900 pt-6 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} {BRAND_INFO.name}. All rights reserved.</span>
-          <span>{BRAND_INFO.domain}</span>
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-6 text-xs text-zinc-500">
+          <span>© {new Date().getFullYear()} {siteSettings.brandName}. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            <span>{siteSettings.domain}</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('admin')}
+              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:border-amber-500/60 hover:text-amber-400 transition-colors cursor-pointer"
+            >
+              <Lock className="h-3 w-3" />
+              <span>Admin</span>
+            </button>
+          </div>
         </div>
       </div>
     </footer>

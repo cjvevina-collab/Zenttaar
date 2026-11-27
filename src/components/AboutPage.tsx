@@ -1,12 +1,14 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Check, MapPin } from 'lucide-react';
-import { BRAND_INFO, PageRoute } from '../data/catalog';
+import { PageRoute, ProductionVideo, SiteSettingsPublic } from '../data/catalog';
 import { ResilientImage } from './ResilientImage';
 import { ProductionVideoSection } from './ProductionVideoSection';
 
 interface AboutPageProps {
   onNavigate: (page: PageRoute) => void;
+  siteSettings: SiteSettingsPublic;
+  videos: ProductionVideo[];
 }
 
 const PILLARS = [
@@ -14,29 +16,33 @@ const PILLARS = [
     step: '01',
     title: 'In-House Fabric Milling & Custom Pantone Dyeing',
     detail:
-      'We mill ring-spun combed French terry and brushed cotton fleece from 380 GSM to 620 GSM with under 3% shrinkage tolerance and exact Pantone color matching.',
+      'Ring-spun combed French terry and brushed cotton fleece from 380 GSM to 620 GSM with exact Pantone color matching.',
   },
   {
     step: '02',
     title: 'Precision CAD Pattern Grading & Cut-and-Sew',
     detail:
-      'Whether you provide a full tech pack or reference garments, our pattern masters digitize graded blocks (XS–3XL) with double-needle coverstitching and reinforced shoulder seams.',
+      'Digitized graded blocks (XS–3XL) with double-needle coverstitching and reinforced shoulder seams.',
   },
   {
     step: '03',
     title: 'Tajima Embroidery, Puff Print & Enzyme Wash Lab',
     detail:
-      'High-density 3D puff plastisol, crackle vintage ink, heavy metallic embroidery, chenille patches, and controlled stone-enzyme washes executed under one roof.',
+      'High-density 3D puff plastisol, crackle vintage ink, metallic embroidery, chenille patches, and stone-enzyme washes.',
   },
   {
     step: '04',
     title: 'AQL 2.5 Quality Audit & Door-to-Door Export',
     detail:
-      'Every piece undergoes measurement verification, thread trimming, custom woven labeling, and frosted polybag packing before DHL Express or air cargo dispatch.',
+      'Measurement verification, custom woven labeling, and frosted polybag packing before DHL Express or air cargo dispatch.',
   },
 ];
 
-export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({
+  onNavigate,
+  siteSettings,
+  videos,
+}) => {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -51,16 +57,16 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             className="lg:col-span-6 space-y-5"
           >
             <p className="text-xs font-medium tracking-wide text-amber-400">
-              About Zenttaar Enterprises
+              About {siteSettings.brandName}
             </p>
             <h1 className="font-display text-3xl sm:text-5xl font-bold tracking-tight text-white text-balance">
               Sialkot’s Luxury Streetwear & Cut-and-Sew Atelier
             </h1>
             <p className="text-sm sm:text-base leading-relaxed text-zinc-300">
-              Located in {BRAND_INFO.address}, Zenttaar Enterprises is a dedicated OEM and private-label apparel manufacturer built for independent streetwear houses, athletic labels, and luxury fashion startups worldwide.
+              Located in {siteSettings.address}, {siteSettings.brandName} is a dedicated OEM and private-label apparel manufacturer built for independent streetwear houses and fashion brands worldwide.
             </p>
             <p className="text-sm sm:text-base leading-relaxed text-zinc-400">
-              From your initial concept or tech pack to small-batch 50-piece launches and 5,000+ unit wholesale drops, we combine heavy-gauge fleece craftsmanship with transparent production timelines.
+              From small-batch 50-piece launches to 5,000+ unit wholesale drops, we combine heavy-gauge fleece craftsmanship with transparent production timelines.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -91,14 +97,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             <ResilientImage
               src="/src/assets/images/atelier_embroidery_craft_1795766292456.jpg"
               fallbackSrc="/src/assets/images/hero_atelier_backdrop_1795766290321.jpg"
-              alt="Zenttaar Enterprises Sialkot embroidery and garment production floor"
+              alt={`${siteSettings.brandName} Sialkot embroidery and garment production floor`}
               loading="eager"
               className="aspect-[16/10] w-full object-cover"
             />
             <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-800 bg-[#0d0d12] px-6 py-4 text-xs text-zinc-300">
               <span className="inline-flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-amber-400" />
-                <span>{BRAND_INFO.address}</span>
+                <span>{siteSettings.address}</span>
               </span>
               <span className="font-display font-medium text-amber-400">ISO-Aligned QC · AQL 2.5</span>
             </div>
@@ -144,7 +150,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      <ProductionVideoSection />
+      <ProductionVideoSection videos={videos} />
     </div>
   );
 };

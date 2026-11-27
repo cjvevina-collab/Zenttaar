@@ -14,6 +14,8 @@
     scroll-behavior: smooth;
     overflow-x: hidden;
     max-width: 100%;
+    scrollbar-color: #eab308 #09090c;
+    scrollbar-width: thin;
   }
 
   h1, h2, h3, h4, .font-display {
@@ -26,8 +28,8 @@
 }
 
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -35,10 +37,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 4px;
+  background: #eab308;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d97706;
+  background: #facc15;
 }

@@ -1,0 +1,226 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default-Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Helper Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Admin UID bootstrapped directly + optional /admins/{uid} collection
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.uid == 'bAIfHmB4M6NiIXSR1GnG3iu0wqg1' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isStr(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    function isNonEmptyStr(val, maxLen) {
+      return val is string && val.size() >= 1 && val.size() <= maxLen;
+    }
+
+    function isValidPublicSettings(data) {
+      return data.keys().hasAll(['brandName', 'email', 'phone', 'whatsappNumber', 'address'])
+        && data.keys().hasOnly([
+          'brandName', 'domain', 'websiteUrl', 'logoUrl', 'backgroundUrl',
+          'address', 'email', 'phone', 'whatsappNumber',
+          'instagramUrl', 'facebookUrl', 'tiktokUrl', 'youtubeUrl', 'updatedAt'
+        ])
+        && isNonEmptyStr(data.brandName, 120)
+        && isNonEmptyStr(data.email, 160)
+        && isNonEmptyStr(data.phone, 40)
+        && isNonEmptyStr(data.whatsappNumber, 40)
+        && isNonEmptyStr(data.address, 300)
+        && (!('domain' in data) || isStr(data.domain, 160))
+        && (!('websiteUrl' in data) || isStr(data.websiteUrl, 300))
+        && (!('logoUrl' in data) || isStr(data.logoUrl, 600))
+        && (!('backgroundUrl' in data) || isStr(data.backgroundUrl, 600))
+        && (!('instagramUrl' in data) || isStr(data.instagramUrl, 400))
+        && (!('facebookUrl' in data) || isStr(data.facebookUrl, 400))
+        && (!('tiktokUrl' in data) || isStr(data.tiktokUrl, 400))
+        && (!('youtubeUrl' in data) || isStr(data.youtubeUrl, 400));
+    }
+
+    function isValidBankingSettings(data) {
+      return data.keys().hasAll(['bankName', 'accountTitle', 'accountNumber'])
+        && data.keys().hasOnly([
+          'bankName', 'accountTitle', 'accountNumber', 'iban',
+          'swiftCode', 'branchAddress', 'paymentNotes', 'updatedAt'
+        ])
+        && isNonEmptyStr(data.bankName, 140)
+        && isNonEmptyStr(data.accountTitle, 140)
+        && isNonEmptyStr(data.accountNumber, 80)
+        && (!('iban' in data) || isStr(data.iban, 80))
+        && (!('swiftCode' in data) || isStr(data.swiftCode, 40))
+        && (!('branchAddress' in data) || isStr(data.branchAddress, 240))
+        && (!('paymentNotes' in data) || isStr(data.paymentNotes, 500));
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['id', 'name', 'category', 'gsm', 'moq', 'priceRange', 'image'])
+        && data.keys().hasOnly([
+          'id', 'name', 'category', 'gsm', 'moq', 'priceRange', 'basePrice',
+          'priceTiers', 'leadTime', 'fabric', 'stitching', 'fit', 'image',
+          'fallbackImage', 'gallery', 'tag', 'description', 'colorways',
+          'techniques', 'sizes', 'sortOrder', 'updatedAt'
+        ])
+        && isNonEmptyStr(data.id, 100)
+        && isNonEmptyStr(data.name, 160)
+        && isNonEmptyStr(data.category, 80)
+        && isNonEmptyStr(data.gsm, 40)
+        && data.moq is number && data.moq >= 1 && data.moq <= 100000
+        && isNonEmptyStr(data.priceRange, 40)
+        && isNonEmptyStr(data.image, 600)
+        && (!('basePrice' in data) || (data.basePrice is number && data.basePrice >= 0))
+        && (!('leadTime' in data) || isStr(data.leadTime, 60))
+        && (!('fabric' in data) || isStr(data.fabric, 180))
+        && (!('stitching' in data) || isStr(data.stitching, 240))
+        && (!('fit' in data) || isStr(data.fit, 120))
+        && (!('fallbackImage' in data) || isStr(data.fallbackImage, 600))
+        && (!('tag' in data) || isStr(data.tag, 60))
+        && (!('description' in data) || isStr(data.description, 1200))
+        && (!('priceTiers' in data) || (data.priceTiers is list && data.priceTiers.size() <= 10))
+        && (!('gallery' in data) || (data.gallery is list && data.gallery.size() <= 10))
+        && (!('colorways' in data) || (data.colorways is list && data.colorways.size() <= 20))
+        && (!('techniques' in data) || (data.techniques is list && data.techniques.size() <= 20))
+        && (!('sizes' in data) || (data.sizes is list && data.sizes.size() <= 12))
+        && (!('sortOrder' in data) || data.sortOrder is number);
+    }
+
+    function isValidVideo(data) {
+      return data.keys().hasAll(['id', 'step', 'title', 'videoUrl'])
+        && data.keys().hasOnly([
+          'id', 'step', 'title', 'duration', 'department', 'summary',
+          'posterImage', 'fallbackPoster', 'videoUrl', 'specs', 'sortOrder', 'updatedAt'
+        ])
+        && isNonEmptyStr(data.id, 80)
+        && isNonEmptyStr(data.step, 10)
+        && isNonEmptyStr(data.title, 160)
+        && isStr(data.videoUrl, 600)
+        && (!('duration' in data) || isStr(data.duration, 20))
+        && (!('department' in data) || isStr(data.department, 120))
+        && (!('summary' in data) || isStr(data.summary, 600))
+        && (!('posterImage' in data) || isStr(data.posterImage, 600))
+        && (!('fallbackPoster' in data) || isStr(data.fallbackPoster, 600))
+        && (!('specs' in data) || (data.specs is list && data.specs.size() <= 10))
+        && (!('sortOrder' in data) || data.sortOrder is number);
+    }
+
+    function isValidTestimonial(data) {
+      return data.keys().hasAll(['id', 'name', 'brand', 'quote'])
+        && data.keys().hasOnly(['id', 'name', 'role', 'brand', 'location', 'orderMetric', 'quote', 'sortOrder', 'updatedAt'])
+        && isNonEmptyStr(data.id, 80)
+        && isNonEmptyStr(data.name, 120)
+        && isNonEmptyStr(data.brand, 120)
+        && isNonEmptyStr(data.quote, 1000)
+        && (!('role' in data) || isStr(data.role, 120))
+        && (!('location' in data) || isStr(data.location, 120))
+        && (!('orderMetric' in data) || isStr(data.orderMetric, 140))
+        && (!('sortOrder' in data) || data.sortOrder is number);
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['refId', 'source', 'name', 'email', 'status', 'createdAt'])
+        && data.keys().hasOnly([
+          'refId', 'source', 'name', 'brandName', 'email', 'phone',
+          'category', 'quantity', 'techPackUrl', 'message', 'itemsSummary',
+          'status', 'createdAt', 'updatedAt'
+        ])
+        && isNonEmptyStr(data.refId, 40)
+        && data.source in ['contact_form', 'inquiry_bag']
+        && isNonEmptyStr(data.name, 120)
+        && isNonEmptyStr(data.email, 160)
+        && data.status in ['pending', 'reviewed', 'quoted', 'archived']
+        && (!('brandName' in data) || isStr(data.brandName, 120))
+        && (!('phone' in data) || isStr(data.phone, 50))
+        && (!('category' in data) || isStr(data.category, 120))
+        && (!('quantity' in data) || isStr(data.quantity, 100))
+        && (!('techPackUrl' in data) || isStr(data.techPackUrl, 600))
+        && (!('message' in data) || isStr(data.message, 2500))
+        && (!('itemsSummary' in data) || isStr(data.itemsSummary, 4000));
+    }
+
+    // 3. Collections
+    match /siteSettings/public {
+      allow get: if true;
+      allow create, update: if isAdmin() && isValidPublicSettings(incoming());
+      allow delete: if false;
+    }
+
+    match /siteSettings/banking {
+      // Bank account details strictly restricted to Admin
+      allow get: if isAdmin();
+      allow create, update: if isAdmin() && isValidBankingSettings(incoming());
+      allow delete: if false;
+    }
+
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(productId) && isValidProduct(incoming()) && incoming().id == productId;
+      allow update: if isAdmin() && isValidId(productId) && isValidProduct(incoming()) && incoming().id == existing().id;
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    match /videos/{videoId} {
+      allow get: if isValidId(videoId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(videoId) && isValidVideo(incoming()) && incoming().id == videoId;
+      allow update: if isAdmin() && isValidId(videoId) && isValidVideo(incoming()) && incoming().id == existing().id;
+      allow delete: if isAdmin() && isValidId(videoId);
+    }
+
+    match /testimonials/{testimonialId} {
+      allow get: if isValidId(testimonialId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(testimonialId) && isValidTestimonial(incoming()) && incoming().id == testimonialId;
+      allow update: if isAdmin() && isValidId(testimonialId) && isValidTestimonial(incoming()) && incoming().id == existing().id;
+      allow delete: if isAdmin() && isValidId(testimonialId);
+    }
+
+    match /inquiries/{inquiryId} {
+      // Public visitors can submit an inquiry (strictly forced to status == 'pending')
+      allow create: if isValidId(inquiryId)
+        && isValidInquiry(incoming())
+        && incoming().status == 'pending'
+        && incoming().createdAt == request.time;
+      // PII Protection: only Admin can read, list, update status, or delete inquiries
+      allow get: if isAdmin() && isValidId(inquiryId);
+      allow list: if isAdmin();
+      allow update: if isAdmin() && isValidId(inquiryId)
+        && isValidInquiry(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+      allow delete: if isAdmin() && isValidId(inquiryId);
+    }
+
+    match /admins/{adminUid} {
+      allow get: if isAdmin() && isValidId(adminUid);
+      allow list, create, update, delete: if false;
+    }
+
+    match /test/connection {
+      allow get: if true;
+    }
+  }
+}

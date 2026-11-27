@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Briefcase, Menu, X } from 'lucide-react';
-import { BRAND_INFO, PageRoute } from '../data/catalog';
+import { PageRoute, SiteSettingsPublic } from '../data/catalog';
 
 interface HeaderProps {
   currentPage: PageRoute;
   onNavigate: (page: PageRoute) => void;
   inquiryCount: number;
   onOpenInquiry: () => void;
+  siteSettings: SiteSettingsPublic;
 }
 
 const NAV_LINKS: { label: string; page: PageRoute }[] = [
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigate,
   inquiryCount,
   onOpenInquiry,
+  siteSettings,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -37,12 +39,12 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={() => handleNavClick('home')}
-          aria-label={BRAND_INFO.name}
+          aria-label={siteSettings.brandName}
           className="flex items-center shrink-0 cursor-pointer rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
         >
           <img
-            src={BRAND_INFO.logoUrl}
-            alt={BRAND_INFO.name}
+            src={siteSettings.logoUrl}
+            alt={siteSettings.brandName}
             referrerPolicy="no-referrer"
             className="h-12 sm:h-14 w-auto object-contain"
           />

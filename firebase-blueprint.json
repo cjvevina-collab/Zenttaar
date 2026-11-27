@@ -1,0 +1,142 @@
+{
+  "entities": {
+    "SiteSettingsPublic": {
+      "title": "SiteSettingsPublic",
+      "description": "Public storefront configuration, contact details, social links, and branding URLs.",
+      "type": "object",
+      "properties": {
+        "brandName": { "type": "string", "maxLength": 120 },
+        "domain": { "type": "string", "maxLength": 160 },
+        "websiteUrl": { "type": "string", "maxLength": 300 },
+        "logoUrl": { "type": "string", "maxLength": 600 },
+        "backgroundUrl": { "type": "string", "maxLength": 600 },
+        "address": { "type": "string", "maxLength": 300 },
+        "email": { "type": "string", "maxLength": 160 },
+        "phone": { "type": "string", "maxLength": 40 },
+        "whatsappNumber": { "type": "string", "maxLength": 40 },
+        "instagramUrl": { "type": "string", "maxLength": 400 },
+        "facebookUrl": { "type": "string", "maxLength": 400 },
+        "tiktokUrl": { "type": "string", "maxLength": 400 },
+        "youtubeUrl": { "type": "string", "maxLength": 400 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["brandName", "email", "phone", "whatsappNumber", "address"]
+    },
+    "SiteSettingsBanking": {
+      "title": "SiteSettingsBanking",
+      "description": "Private admin-only bank account and wire transfer details for wholesale invoicing.",
+      "type": "object",
+      "properties": {
+        "bankName": { "type": "string", "maxLength": 140 },
+        "accountTitle": { "type": "string", "maxLength": 140 },
+        "accountNumber": { "type": "string", "maxLength": 80 },
+        "iban": { "type": "string", "maxLength": 80 },
+        "swiftCode": { "type": "string", "maxLength": 40 },
+        "branchAddress": { "type": "string", "maxLength": 240 },
+        "paymentNotes": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["bankName", "accountTitle", "accountNumber"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Apparel manufacturing silhouette with GSM, MOQ, pricing tiers, colorways, and techniques.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 100 },
+        "name": { "type": "string", "maxLength": 160 },
+        "category": { "type": "string", "maxLength": 80 },
+        "gsm": { "type": "string", "maxLength": 40 },
+        "moq": { "type": "number" },
+        "priceRange": { "type": "string", "maxLength": 40 },
+        "basePrice": { "type": "number" },
+        "leadTime": { "type": "string", "maxLength": 60 },
+        "fabric": { "type": "string", "maxLength": 180 },
+        "stitching": { "type": "string", "maxLength": 240 },
+        "fit": { "type": "string", "maxLength": 120 },
+        "image": { "type": "string", "maxLength": 600 },
+        "fallbackImage": { "type": "string", "maxLength": 600 },
+        "tag": { "type": "string", "maxLength": 60 },
+        "description": { "type": "string", "maxLength": 1200 },
+        "sortOrder": { "type": "number" }
+      },
+      "required": ["id", "name", "category", "gsm", "moq", "priceRange", "image"]
+    },
+    "ProductionVideo": {
+      "title": "ProductionVideo",
+      "description": "Factory floor reel stage with MP4 video link and poster.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 80 },
+        "step": { "type": "string", "maxLength": 10 },
+        "title": { "type": "string", "maxLength": 160 },
+        "duration": { "type": "string", "maxLength": 20 },
+        "department": { "type": "string", "maxLength": 120 },
+        "summary": { "type": "string", "maxLength": 600 },
+        "posterImage": { "type": "string", "maxLength": 600 },
+        "fallbackPoster": { "type": "string", "maxLength": 600 },
+        "videoUrl": { "type": "string", "maxLength": 600 },
+        "sortOrder": { "type": "number" }
+      },
+      "required": ["id", "step", "title", "videoUrl"]
+    },
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "Verified B2B brand partner review.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 80 },
+        "name": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "maxLength": 120 },
+        "brand": { "type": "string", "maxLength": 120 },
+        "location": { "type": "string", "maxLength": 120 },
+        "orderMetric": { "type": "string", "maxLength": 140 },
+        "quote": { "type": "string", "maxLength": 1000 }
+      },
+      "required": ["id", "name", "brand", "quote"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Customer bulk manufacturing inquiry or quote bag submission (PII protected).",
+      "type": "object",
+      "properties": {
+        "refId": { "type": "string", "maxLength": 40 },
+        "source": { "type": "string", "enum": ["contact_form", "inquiry_bag"] },
+        "name": { "type": "string", "maxLength": 120 },
+        "brandName": { "type": "string", "maxLength": 120 },
+        "email": { "type": "string", "maxLength": 160 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "category": { "type": "string", "maxLength": 120 },
+        "quantity": { "type": "string", "maxLength": 100 },
+        "techPackUrl": { "type": "string", "maxLength": 600 },
+        "message": { "type": "string", "maxLength": 2500 },
+        "itemsSummary": { "type": "string", "maxLength": 4000 },
+        "status": { "type": "string", "enum": ["pending", "reviewed", "quoted", "archived"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["refId", "source", "name", "email", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/siteSettings/{docId}": {
+      "schema": { "$ref": "#/entities/SiteSettingsPublic" },
+      "description": "Public storefront settings (`public`) and private banking info (`banking`)."
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Apparel catalog products managed by Admin."
+    },
+    "/videos/{videoId}": {
+      "schema": { "$ref": "#/entities/ProductionVideo" },
+      "description": "Factory floor MP4 video reels managed by Admin."
+    },
+    "/testimonials/{testimonialId}": {
+      "schema": { "$ref": "#/entities/Testimonial" },
+      "description": "Client brand partner testimonials managed by Admin."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/Inquiry" },
+      "description": "Incoming customer manufacturing inquiries and bag submissions."
+    }
+  }
+}

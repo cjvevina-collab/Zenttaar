@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Check, Plus } from 'lucide-react';
-import { GARMENTS, GarmentProduct } from '../data/catalog';
+import { GarmentProduct } from '../data/catalog';
 import { ResilientImage } from './ResilientImage';
 
 interface CatalogSectionProps {
+  products: GarmentProduct[];
   title?: string;
   subtitle?: string;
   limit?: number;
@@ -22,8 +23,9 @@ interface CatalogSectionProps {
 const CATEGORIES = ['All', 'Hoodies', 'Sets & Outerwear', 'Custom Blanks'] as const;
 
 export const CatalogSection: React.FC<CatalogSectionProps> = ({
+  products,
   title = 'Signature Silhouettes',
-  subtitle = 'Select any piece for full sizing specs, tiered wholesale pricing, and custom options.',
+  subtitle = 'Heavyweight cuts ready for private-label branding.',
   limit,
   showViewAllButton = false,
   onViewAll,
@@ -36,16 +38,16 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
 
   const filteredByCat =
     selectedCategory === 'All'
-      ? GARMENTS
-      : GARMENTS.filter((item) => item.category === selectedCategory);
+      ? products
+      : products.filter((item) => item.category === selectedCategory);
 
   const displayItems = limit ? filteredByCat.slice(0, limit) : filteredByCat;
 
   const handleQuickAdd = (product: GarmentProduct) => {
     onAddToInquiry(
       product,
-      product.colorways[0].name,
-      product.techniques[0],
+      product.colorways?.[0]?.name || 'Custom Color',
+      product.techniques?.[0] || 'Custom Print',
       product.moq
     );
     setAddedId(product.id);
@@ -63,7 +65,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
             <h2 className="mt-1.5 font-display text-2xl sm:text-4xl font-bold tracking-tight text-white text-balance">
               {title}
             </h2>
-            <p className="mt-2 max-w-xl text-sm text-zinc-400">{subtitle}</p>
+            {subtitle && <p className="mt-2 max-w-xl text-sm text-zinc-400">{subtitle}</p>}
           </div>
 
           <div

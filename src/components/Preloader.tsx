@@ -62,7 +62,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
             >
               <img
                 src={BRAND_INFO.logoUrl}
-                alt={BRAND_INFO.name}
+                alt={BRAND_INFO.brandName}
                 referrerPolicy="no-referrer"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).style.display = 'none';

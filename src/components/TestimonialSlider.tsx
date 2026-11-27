@@ -1,29 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
-import { TESTIMONIALS } from '../data/catalog';
+import { TestimonialItem } from '../data/catalog';
 
-export const TestimonialSlider: React.FC = () => {
+interface TestimonialSliderProps {
+  testimonials: TestimonialItem[];
+}
+
+export const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
+  testimonials,
+}) => {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
+  const total = testimonials.length;
+  const safeIndex = total > 0 ? index % total : 0;
+
   useEffect(() => {
-    if (paused) return;
+    if (paused || total <= 1) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+      setIndex((prev) => (prev + 1) % total);
     }, 6500);
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, total]);
 
-  const current = TESTIMONIALS[index];
+  if (total === 0) return null;
+
+  const current = testimonials[safeIndex];
 
   const handlePrev = () => {
-    setIndex((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+    setIndex((prev) => (prev - 1 + total) % total);
   };
 
   const handleNext = () => {
-    setIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+    setIndex((prev) => (prev + 1) % total);
   };
 
   return (
@@ -99,19 +110,19 @@ export const TestimonialSlider: React.FC = () => {
           </AnimatePresence>
 
           <div className="mt-7 flex items-center gap-2 border-t border-zinc-800/70 pt-5">
-            {TESTIMONIALS.map((item, idx) => (
+            {testimonials.map((item, idx) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setIndex(idx)}
                 aria-label={`Read review from ${item.name}`}
                 className={`h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
-                  idx === index ? 'w-8 bg-amber-500' : 'w-3 bg-zinc-700 hover:bg-zinc-500'
+                  idx === safeIndex ? 'w-8 bg-amber-500' : 'w-3 bg-zinc-700 hover:bg-zinc-500'
                 }`}
               />
             ))}
             <span className="ml-auto font-display text-xs tabular-nums text-zinc-500">
-              0{index + 1} / 0{TESTIMONIALS.length}
+              {String(safeIndex + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
             </span>
           </div>
         </div>
