@@ -12,11 +12,12 @@ export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
   videos,
 }) => {
   const [activeIdx, setActiveIdx] = useState(0);
-  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
-  const [bufferingIdx, setBufferingIdx] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [fallbackPlaying, setFallbackPlaying] = useState(false);
   const [reelProgress, setReelProgress] = useState(0);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const playOnLoadRef = useRef(false);
   const shouldReduceMotion = useReducedMotion();
 
   const safeIdx = activeIdx < videos.length ? activeIdx : 0;
@@ -25,7 +26,19 @@ export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
   useEffect(() => {
     setReelProgress(0);
     setFallbackPlaying(false);
-  }, [safeIdx]);
+    setIsPlaying(false);
+    setIsBuffering(false);
+
+    const el = videoRef.current;
+    if (el && playOnLoadRef.current && currentVideo?.videoUrl) {
+      playOnLoadRef.current = false;
+      el.load();
+      const p = el.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => {});
+      }
+    }
+  }, [safeIdx, currentVideo?.videoUrl]);
 
   useEffect(() => {
     if (!currentVideo || !fallbackPlaying || currentVideo.videoUrl) return;
@@ -35,47 +48,30 @@ export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
     return () => clearInterval(interval);
   }, [fallbackPlaying, currentVideo]);
 
-  const playVideoAtIndex = (idx: number) => {
-    videoRefs.current.forEach((v, i) => {
-      if (v && i !== idx && !v.paused) {
-        v.pause();
+  const handleStagePlayClick = () => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (el.paused) {
+      if (el.readyState < 3) setIsBuffering(true);
+      const p = el.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => setIsBuffering(false));
       }
-    });
-    const target = videoRefs.current[idx];
-    if (!target) return;
-    if (target.readyState < 3) {
-      setBufferingIdx(idx);
-    }
-    const playPromise = target.play();
-    if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise.catch(() => {
-        setBufferingIdx(null);
-      });
+    } else {
+      el.pause();
     }
   };
 
   const handleSelectChapter = (idx: number) => {
+    if (idx === safeIdx) {
+      handleStagePlayClick();
+      return;
+    }
+    playOnLoadRef.current = true;
     setActiveIdx(idx);
-    const chosen = videos[idx];
-    if (chosen?.videoUrl) {
-      playVideoAtIndex(idx);
-    }
-  };
-
-  const handleStagePlayClick = () => {
-    const target = videoRefs.current[safeIdx];
-    if (!target) return;
-    if (target.paused) {
-      playVideoAtIndex(safeIdx);
-    } else {
-      target.pause();
-    }
   };
 
   if (!currentVideo) return null;
-
-  const isCurrentPlaying = playingIdx === safeIdx;
-  const isCurrentBuffering = bufferingIdx === safeIdx;
 
   return (
     <section id="production" className="relative border-t border-zinc-800/80 py-14 sm:py-20">
@@ -101,64 +97,44 @@ export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
         </motion.div>
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12 items-stretch">
-          {/* Active Video Stage — All MP4s pre-mounted for instant 1-click play & natural frame thumbnail */}
+          {/* Active Video Stage — Instant local faststart MP4 + real extracted poster thumbnail */}
           <div className="lg:col-span-7 flex flex-col overflow-hidden rounded-xl border border-zinc-800/90 bg-[#0d0d12]/95">
             <div className="relative aspect-video w-full overflow-hidden bg-black">
               {currentVideo.videoUrl ? (
                 <>
-                  {videos.map((vid, idx) => {
-                    if (!vid.videoUrl) return null;
-                    const isVisible = idx === safeIdx;
-                    return (
-                      <video
-                        key={vid.id}
-                        ref={(el) => {
-                          videoRefs.current[idx] = el;
-                        }}
-                        src={vid.videoUrl}
-                        controls={isVisible}
-                        playsInline
-                        preload="auto"
-                        onPlay={() => {
-                          setPlayingIdx(idx);
-                          setBufferingIdx((prev) => (prev === idx ? null : prev));
-                        }}
-                        onPause={() => {
-                          setPlayingIdx((prev) => (prev === idx ? null : prev));
-                        }}
-                        onEnded={() => {
-                          setPlayingIdx((prev) => (prev === idx ? null : prev));
-                          setBufferingIdx((prev) => (prev === idx ? null : prev));
-                        }}
-                        onWaiting={() => {
-                          if (idx === safeIdx) setBufferingIdx(idx);
-                        }}
-                        onCanPlay={() => {
-                          setBufferingIdx((prev) => (prev === idx ? null : prev));
-                        }}
-                        onPlaying={() => {
-                          setPlayingIdx(idx);
-                          setBufferingIdx((prev) => (prev === idx ? null : prev));
-                        }}
-                        onError={() => {
-                          setBufferingIdx((prev) => (prev === idx ? null : prev));
-                        }}
-                        className={`absolute inset-0 h-full w-full object-contain bg-black transition-opacity duration-150 ${
-                          isVisible
-                            ? 'opacity-100 z-10'
-                            : 'opacity-0 pointer-events-none z-0'
-                        }`}
-                      />
-                    );
-                  })}
+                  <video
+                    ref={videoRef}
+                    key={currentVideo.videoUrl}
+                    src={currentVideo.videoUrl}
+                    poster={currentVideo.posterImage}
+                    controls
+                    playsInline
+                    preload="auto"
+                    onPlay={() => {
+                      setIsPlaying(true);
+                      setIsBuffering(false);
+                    }}
+                    onPlaying={() => {
+                      setIsPlaying(true);
+                      setIsBuffering(false);
+                    }}
+                    onPause={() => setIsPlaying(false)}
+                    onEnded={() => {
+                      setIsPlaying(false);
+                      setIsBuffering(false);
+                    }}
+                    onWaiting={() => setIsBuffering(true)}
+                    onCanPlay={() => setIsBuffering(false)}
+                    onError={() => setIsBuffering(false)}
+                    className="h-full w-full object-contain bg-black"
+                  />
 
-                  {/* Instant 1-Click Center Play Button Overlay when paused */}
-                  {!isCurrentPlaying && !isCurrentBuffering && (
+                  {!isPlaying && !isBuffering && (
                     <button
                       type="button"
                       onClick={handleStagePlayClick}
                       aria-label={`Play ${currentVideo.title}`}
-                      className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer"
+                      className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer"
                     >
                       <span className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-400/70 bg-zinc-950/85 text-amber-400 shadow-2xl backdrop-blur-md transition-transform duration-150 hover:scale-105 hover:bg-amber-500 hover:text-zinc-950">
                         <Play className="h-7 w-7 ml-0.5 fill-current" />
@@ -166,8 +142,8 @@ export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
                     </button>
                   )}
 
-                  {isCurrentBuffering && (
-                    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/30">
+                  {isBuffering && (
+                    <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/25">
                       <Loader2 className="h-9 w-9 animate-spin text-amber-400" />
                     </div>
                   )}
@@ -234,7 +210,7 @@ export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
             </div>
           </div>
 
-          {/* Video Reel Chapters — Real First-Frame Thumbnails Preloaded */}
+          {/* Video Reel Chapters — Instant JPG Frame Thumbnails Extracted From Each MP4 */}
           <div className="lg:col-span-5 flex flex-col gap-2.5 max-h-[540px] lg:overflow-y-auto pr-0.5">
             {videos.map((video, index) => {
               const isActive = index === safeIdx;
@@ -250,22 +226,13 @@ export const ProductionVideoSection: React.FC<ProductionVideoSectionProps> = ({
                   }`}
                 >
                   <div className="relative h-16 w-24 sm:h-18 sm:w-28 shrink-0 overflow-hidden rounded-lg bg-zinc-950">
-                    {video.videoUrl ? (
-                      <video
-                        src={`${video.videoUrl}#t=0.01`}
-                        muted
-                        playsInline
-                        preload="auto"
-                        className="h-full w-full object-cover pointer-events-none"
-                      />
-                    ) : (
-                      <ResilientImage
-                        src={video.posterImage}
-                        fallbackSrc={video.fallbackPoster}
-                        alt={video.title}
-                        className="h-full w-full object-cover"
-                      />
-                    )}
+                    <ResilientImage
+                      src={video.posterImage}
+                      fallbackSrc={video.fallbackPoster}
+                      alt={video.title}
+                      loading="eager"
+                      className="h-full w-full object-cover"
+                    />
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                       <span
                         className={`inline-flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm ${

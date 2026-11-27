@@ -19,7 +19,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ whatsappNumber }
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
       title="WhatsApp"
-      className="fixed bottom-5 right-5 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl shadow-black/40 hover:bg-[#20BD5A] active:scale-[0.95] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]"
+      className="fixed bottom-5 left-5 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl shadow-black/40 hover:bg-[#20BD5A] active:scale-[0.95] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]"
     >
       <svg
         className="h-7 w-7"

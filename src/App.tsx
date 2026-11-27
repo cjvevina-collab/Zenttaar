@@ -26,7 +26,6 @@ import {
   subscribeVideos,
 } from './services/firestoreService';
 import { ResilientImage } from './components/ResilientImage';
-import { Preloader } from './components/Preloader';
 import { LightningCursor } from './components/LightningCursor';
 import { Header } from './components/Header';
 import { HeroBannerSlider } from './components/HeroBannerSlider';
@@ -43,10 +42,10 @@ import { LegalPage } from './components/LegalPage';
 import { InquiryDrawer } from './components/InquiryDrawer';
 import { Footer } from './components/Footer';
 import { WhatsAppButton } from './components/WhatsAppButton';
+import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { AdminPortal } from './components/AdminPortal';
 
 export default function App() {
-  const [preloaderDone, setPreloaderDone] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageRoute>('home');
   const [siteSettings, setSiteSettings] = useState<SiteSettingsPublic>(DEFAULT_SITE_SETTINGS);
   const [products, setProducts] = useState<GarmentProduct[]>(GARMENTS);
@@ -228,9 +227,6 @@ export default function App() {
           />
         </div>
 
-        {/* Starting Preloader */}
-        {!preloaderDone && <Preloader onComplete={() => setPreloaderDone(true)} />}
-
         {/* Fast Silky Electric Lightning Cursor Trail */}
         <LightningCursor />
 
@@ -263,7 +259,7 @@ export default function App() {
                       products={products}
                       title="Featured Hoodies & Blanks"
                       subtitle="Open any silhouette for wholesale pricing tiers and sizing."
-                      limit={3}
+                      limit={6}
                       showViewAllButton
                       onViewAll={() => navigateTo('shop')}
                       onSelectProduct={(id) => navigateTo('product', id)}
@@ -415,8 +411,11 @@ export default function App() {
           />
         </div>
 
-        {/* Fixed Pure Green Circular WhatsApp Action */}
+        {/* Fixed Pure Green Circular WhatsApp Action (Bottom-Left) */}
         <WhatsAppButton whatsappNumber={siteSettings.whatsappNumber} />
+
+        {/* Fixed Scroll-to-Top Action (Bottom-Right) */}
+        <ScrollToTopButton />
 
         {/* Slide-Over Inquiry Bag Drawer */}
         <InquiryDrawer
@@ -434,7 +433,7 @@ export default function App() {
           <div
             role="status"
             aria-live="polite"
-            className="fixed bottom-5 left-4 sm:left-5 z-50 flex items-center gap-3 rounded-lg border border-amber-500/40 bg-[#0d0d12]/95 px-4 py-3 text-xs font-medium text-white shadow-xl backdrop-blur-md max-w-[calc(100vw-6rem)]"
+            className="fixed bottom-24 left-4 sm:left-5 z-50 flex items-center gap-3 rounded-lg border border-amber-500/40 bg-[#0d0d12]/95 px-4 py-3 text-xs font-medium text-white shadow-xl backdrop-blur-md max-w-[calc(100vw-3rem)]"
           >
             <span className="truncate">{toastMsg}</span>
             <button
