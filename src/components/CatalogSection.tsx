@@ -46,7 +46,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
   const handleQuickAdd = (product: GarmentProduct) => {
     onAddToInquiry(
       product,
-      product.colorways?.[0]?.name || 'Custom Color',
+      'Custom Color',
       product.techniques?.[0] || 'Custom Print',
       product.moq
     );
@@ -109,15 +109,15 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                 <button
                   type="button"
                   onClick={() => onSelectProduct(product.id)}
-                  className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 text-left cursor-pointer"
+                  className="relative h-[420px] sm:h-[460px] w-full overflow-hidden bg-zinc-950 text-left cursor-pointer"
                 >
                   <ResilientImage
                     src={product.image}
                     fallbackSrc={product.fallbackImage}
                     alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0d0d12] via-transparent to-black/20" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0d0d12] to-transparent" />
                 </button>
 
                 <div className="flex flex-1 flex-col p-5">
@@ -135,19 +135,16 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                     {product.name}
                   </button>
 
-                  {/* Colorways Row */}
-                  <div className="mt-3.5 flex items-center justify-between gap-2">
-                    <span className="text-xs text-zinc-500">Colorways</span>
-                    <div className="flex items-center gap-1.5" aria-label="Available colorways">
-                      {product.colorways.map((color) => (
-                        <span
-                          key={color.name}
-                          title={color.name}
-                          className="h-3.5 w-3.5 rounded-full border border-white/25 shrink-0"
-                          style={{ backgroundColor: color.hex }}
-                        />
-                      ))}
-                    </div>
+                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-zinc-400">
+                    {product.description}
+                  </p>
+
+                  {/* Custom Dye & Tailoring Row */}
+                  <div className="mt-3.5 flex items-center justify-between gap-2 text-xs">
+                    <span className="text-zinc-500">Customization</span>
+                    <span className="font-medium text-amber-400/90 truncate">
+                      Custom Color · Sizing · Print
+                    </span>
                   </div>
 
                   {/* Single-Line Pricing & MOQ Row */}

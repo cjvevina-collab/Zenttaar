@@ -5,7 +5,8 @@ interface WhatsAppButtonProps {
 }
 
 export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ whatsappNumber }) => {
-  const cleanNumber = (whatsappNumber || '123456789').replace(/[^0-9]/g, '') || '123456789';
+  const digitsOnly = (whatsappNumber || '03335541751').replace(/[^0-9]/g, '') || '923335541751';
+  const cleanNumber = digitsOnly.startsWith('0') ? `92${digitsOnly.slice(1)}` : digitsOnly;
   const message = encodeURIComponent(
     'Hello Zenttaar Enterprises, I would like to inquire about custom apparel manufacturing.'
   );

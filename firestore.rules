@@ -98,7 +98,7 @@ service cloud.firestore {
         && (!('fit' in data) || isStr(data.fit, 120))
         && (!('fallbackImage' in data) || isStr(data.fallbackImage, 600))
         && (!('tag' in data) || isStr(data.tag, 60))
-        && (!('description' in data) || isStr(data.description, 1200))
+        && (!('description' in data) || isStr(data.description, 4000))
         && (!('priceTiers' in data) || (data.priceTiers is list && data.priceTiers.size() <= 10))
         && (!('gallery' in data) || (data.gallery is list && data.gallery.size() <= 10))
         && (!('colorways' in data) || (data.colorways is list && data.colorways.size() <= 20))

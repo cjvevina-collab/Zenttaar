@@ -3,7 +3,6 @@ import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'f
 import {
   Check,
   Copy,
-  Database,
   Edit3,
   Inbox,
   Landmark,
@@ -39,7 +38,6 @@ import {
   savePublicSettings,
   saveTestimonial,
   saveVideo,
-  seedDefaultsToFirestore,
   subscribeAdminInquiries,
   updateInquiryStatus,
   uploadImageToImgbb,
@@ -257,7 +255,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   // Product Editor State
   const [editingProduct, setEditingProduct] = useState<GarmentProduct | null>(null);
-  const [productColorText, setProductColorText] = useState('');
   const [productTechText, setProductTechText] = useState('');
 
   // Video Editor State
@@ -362,22 +359,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       gallery: [],
       tag: 'Custom Drop',
       description: '',
-      colorways: [
-        { name: 'Obsidian Black', hex: '#141418' },
-        { name: 'Burnished Gold', hex: '#D97706' },
-      ],
+      colorways: [{ name: 'Custom Shade', hex: '#141418' }],
       techniques: ['3D Puff Print', 'Heavy Embroidery'],
-      sizes: ['S', 'M', 'L', 'XL', '2XL'],
+      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
       sortOrder: products.length + 1,
     };
     setEditingProduct(newProd);
-    setProductColorText('Obsidian Black:#141418, Burnished Gold:#D97706');
     setProductTechText('3D Puff Print, Heavy Embroidery');
   };
 
   const startEditProduct = (p: GarmentProduct) => {
     setEditingProduct({ ...p });
-    setProductColorText(p.colorways.map((c) => `${c.name}:${c.hex}`).join(', '));
     setProductTechText(p.techniques.join(', '));
   };
 
@@ -385,14 +377,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     e.preventDefault();
     if (!editingProduct) return;
     try {
-      const parsedColors = productColorText
-        .split(',')
-        .map((pair) => {
-          const [name, hex] = pair.split(':').map((s) => s.trim());
-          return name ? { name, hex: hex || '#141418' } : null;
-        })
-        .filter((x): x is { name: string; hex: string } => Boolean(x));
-
       const parsedTechs = productTechText
         .split(',')
         .map((s) => s.trim())
@@ -400,16 +384,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       const finalProduct: GarmentProduct = {
         ...editingProduct,
-        gallery:
-          editingProduct.gallery && editingProduct.gallery.length > 0
-            ? editingProduct.gallery
-            : [editingProduct.image],
-        colorways: parsedColors.length > 0 ? parsedColors : editingProduct.colorways,
+        gallery: editingProduct.image ? [editingProduct.image] : [],
+        colorways:
+          editingProduct.colorways && editingProduct.colorways.length > 0
+            ? editingProduct.colorways
+            : [{ name: 'Custom Shade', hex: '#141418' }],
         techniques: parsedTechs.length > 0 ? parsedTechs : editingProduct.techniques,
       };
       await saveProduct(finalProduct);
       setEditingProduct(null);
-      notify(`Saved product "${finalProduct.name}".`);
+      notify(`Saved product "${finalProduct.name}" directly to Firebase.`);
     } catch (err) {
       notifyError(err);
     }
@@ -515,7 +499,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@zenttaarenterprises.store"
+                placeholder="info@zenttaarenterprises.store"
                 className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-amber-500 focus:outline-none"
               />
             </div>
@@ -581,7 +565,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     { id: 'videos', label: `Videos (${videos.length})`, icon: <Video className="h-4 w-4" /> },
     { id: 'testimonials', label: 'Reviews', icon: <MessageSquareQuote className="h-4 w-4" /> },
     { id: 'inquiries', label: `Inquiries (${inquiries.length})`, icon: <Inbox className="h-4 w-4" /> },
-    { id: 'setup', label: 'Rules & Sync', icon: <ShieldCheck className="h-4 w-4" /> },
+    { id: 'setup', label: 'Security Rules', icon: <ShieldCheck className="h-4 w-4" /> },
   ];
 
   return (
@@ -591,28 +575,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         <div>
           <p className="text-xs font-medium text-amber-400">Zenttaar Management Console</p>
           <h1 className="mt-1 font-display text-2xl sm:text-3xl font-bold text-white">
-            Storefront & Manufacturing Admin
+            Storefront &amp; Manufacturing Admin
           </h1>
-          <p className="mt-1 text-xs text-zinc-400">Signed in as {user.email}</p>
+          <p className="mt-1 text-xs text-zinc-400">
+            All changes save directly to Firebase · Signed in as {user.email}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={async () => {
-              try {
-                await seedDefaultsToFirestore();
-                notify('Synced default catalog, 6 videos & settings to Firestore.');
-              } catch (err) {
-                notifyError(err);
-              }
-            }}
-            className="inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 cursor-pointer"
-          >
-            <Database className="h-4 w-4" />
-            <span>Sync Defaults to Firebase</span>
-          </button>
-
           <button
             type="button"
             onClick={() => signOut(auth)}
@@ -1118,13 +1088,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-300">
-                    Colorways (Name:#Hex, comma-separated)
-                  </label>
+                  <label className="block text-xs text-zinc-300">Fit / Cut Spec</label>
                   <input
                     type="text"
-                    value={productColorText}
-                    onChange={(e) => setProductColorText(e.target.value)}
+                    value={editingProduct.fit}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, fit: e.target.value })
+                    }
                     className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white"
                   />
                 </div>
@@ -1144,7 +1114,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <div>
                 <label className="block text-xs text-zinc-300">Description</label>
                 <textarea
-                  rows={2}
+                  rows={4}
                   value={editingProduct.description}
                   onChange={(e) =>
                     setEditingProduct({ ...editingProduct, description: e.target.value })

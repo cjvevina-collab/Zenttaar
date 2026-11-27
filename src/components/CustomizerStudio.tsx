@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { Check, Plus } from 'lucide-react';
 import { GarmentProduct, InquiryItem } from '../data/catalog';
 import { ResilientImage } from './ResilientImage';
+import { ColorPickerField, describeColorName } from './ColorPickerField';
 
 interface CustomizerStudioProps {
   seedProduct: GarmentProduct | null;
@@ -54,15 +55,6 @@ const FABRICS = [
   { label: '620 GSM Melton / Fleece', add: 7 },
 ];
 
-const SHARP_COLORWAYS = [
-  { name: 'Obsidian Black', hex: '#141418' },
-  { name: 'Crimson Ember', hex: '#991B1B' },
-  { name: 'Electric Cobalt', hex: '#1E3A8A' },
-  { name: 'Emerald Deep', hex: '#064E3B' },
-  { name: 'Burnished Gold', hex: '#92400E' },
-  { name: 'Chalk Bone', hex: '#D4D4D8' },
-];
-
 const WASH_FINISHES = ['Clean Reactive Dye', 'Vintage Enzyme Wash', 'Acid / Sun-Fade Patina'];
 
 const TECHNIQUES = [
@@ -85,7 +77,8 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
 }) => {
   const [silhouette, setSilhouette] = useState(SILHOUETTES[0]);
   const [fabric, setFabric] = useState(FABRICS[1]);
-  const [colorway, setColorway] = useState(SHARP_COLORWAYS[0]);
+  const [customHex, setCustomHex] = useState('#141418');
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL']);
   const [wash, setWash] = useState(WASH_FINISHES[0]);
   const [technique, setTechnique] = useState(TECHNIQUES[0]);
   const [selectedTrims, setSelectedTrims] = useState<string[]>([TRIMS[0], TRIMS[2]]);
@@ -118,6 +111,16 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
     );
   };
 
+  const toggleSize = (sz: string) => {
+    setSelectedSizes((prev) => {
+      if (prev.includes(sz)) {
+        return prev.length === 1 ? prev : prev.filter((s) => s !== sz);
+      }
+      return [...prev, sz];
+    });
+  };
+
+  const colorLabel = describeColorName(customHex);
   const volumeDiscount = quantity >= 500 ? 0.85 : quantity >= 250 ? 0.91 : quantity >= 100 ? 0.96 : 1;
   const trimAdd = selectedTrims.length * 0.75;
   const washAdd = wash === WASH_FINISHES[0] ? 0 : 2.2;
@@ -134,15 +137,15 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
       image: silhouette.image,
       fallbackImage: silhouette.fallback,
       gsm: fabric.label,
-      colorway: `${colorway.name} · ${wash}`,
+      colorway: `${colorLabel} · ${wash}`,
       technique,
       quantity,
       unitPriceEstimate: estimatedUnitPrice,
-      customNotes: `${brandLabelText ? `Brand Label: ${brandLabelText} · ` : ''}Trims: ${
-        selectedTrims.join(', ') || 'Standard'
-      }${techPackLink ? ` · Tech Pack: ${techPackLink}` : ''}${
-        customNotes ? ` · ${customNotes}` : ''
-      }`,
+      customNotes: `Sizes: ${selectedSizes.join(', ')} · ${
+        brandLabelText ? `Brand Label: ${brandLabelText} · ` : ''
+      }Trims: ${selectedTrims.join(', ') || 'Standard'}${
+        techPackLink ? ` · Tech Pack: ${techPackLink}` : ''
+      }${customNotes ? ` · ${customNotes}` : ''}`,
       isCustomBuild: true,
     };
 
@@ -168,21 +171,21 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
             Build Your Custom Garment Spec
           </h1>
           <p className="mt-2 text-sm sm:text-base text-zinc-400">
-            Configure silhouette, fabric GSM, dye bath, and print finish to generate a direct factory quote.
+            Configure silhouette, fabric GSM, exact dye color code, stitching, and print finish for a direct factory quote.
           </p>
         </motion.div>
 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
           {/* Left: Studio Summary Card */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 overflow-hidden rounded-xl border border-zinc-800/90 bg-[#0d0d12]/95">
-            <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950">
+            <div className="relative h-[380px] sm:h-[440px] w-full overflow-hidden bg-zinc-950">
               <ResilientImage
                 src={silhouette.image}
                 fallbackSrc={silhouette.fallback}
                 alt={silhouette.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d12] via-[#0d0d12]/25 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0d0d12] via-[#0d0d12]/60 to-transparent" />
               <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-4">
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-amber-400">Selected Cut</div>
@@ -192,8 +195,8 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
                 </div>
                 <span
                   className="h-7 w-7 shrink-0 rounded-full border-2 border-white/40 shadow-lg"
-                  style={{ backgroundColor: colorway.hex }}
-                  title={colorway.name}
+                  style={{ backgroundColor: customHex }}
+                  title={colorLabel}
                 />
               </div>
             </div>
@@ -204,9 +207,19 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
                   <dt className="text-zinc-400">Fabric Weight</dt>
                   <dd className="font-medium text-zinc-100 text-right">{fabric.label}</dd>
                 </div>
+                <div className="flex justify-between gap-4 items-center">
+                  <dt className="text-zinc-400">Selected Color</dt>
+                  <dd className="inline-flex items-center gap-2 font-medium text-amber-400 text-right">
+                    <span
+                      className="h-3.5 w-3.5 rounded-full border border-white/35 shrink-0"
+                      style={{ backgroundColor: customHex }}
+                    />
+                    <span>{colorLabel}</span>
+                  </dd>
+                </div>
                 <div className="flex justify-between gap-4">
-                  <dt className="text-zinc-400">Colorway</dt>
-                  <dd className="font-medium text-zinc-100 text-right">{colorway.name}</dd>
+                  <dt className="text-zinc-400">Size Run</dt>
+                  <dd className="font-medium text-zinc-100 text-right">{selectedSizes.join(', ')}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-zinc-400">Wash Finish</dt>
@@ -282,33 +295,41 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <ColorPickerField
+                value={customHex}
+                onChange={setCustomHex}
+                label="03. Custom Garment Color (Pick Any Shade)"
+              />
+
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                  03. Colorway ({colorway.name})
+                  03b. Size Run
                 </label>
-                <div className="mt-2.5 flex flex-wrap gap-2.5">
-                  {SHARP_COLORWAYS.map((c) => (
-                    <button
-                      key={c.name}
-                      type="button"
-                      onClick={() => setColorway(c)}
-                      title={c.name}
-                      aria-label={`Select colorway ${c.name}`}
-                      className={`h-9 w-9 rounded-lg border-2 transition-transform cursor-pointer ${
-                        colorway.name === c.name
-                          ? 'scale-110 border-amber-400 ring-2 ring-amber-500/30'
-                          : 'border-zinc-700 hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: c.hex }}
-                    />
-                  ))}
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', 'Custom Sizing'].map((sz) => {
+                    const active = selectedSizes.includes(sz);
+                    return (
+                      <button
+                        key={sz}
+                        type="button"
+                        onClick={() => toggleSize(sz)}
+                        className={`rounded-lg border px-3 py-1.5 text-xs transition-colors cursor-pointer ${
+                          active
+                            ? 'border-amber-500 bg-amber-500 text-zinc-950 font-semibold'
+                            : 'border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-zinc-700'
+                        }`}
+                      >
+                        {sz}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                  04. Dye & Wash
+                  04. Dye &amp; Wash
                 </label>
                 <div className="mt-2.5 flex flex-wrap gap-2">
                   {WASH_FINISHES.map((w) => (
