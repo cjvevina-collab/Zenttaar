@@ -147,13 +147,13 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                     </span>
                   </div>
 
-                  {/* Single-Line Pricing & MOQ Row */}
+                  {/* Single-Line MOQ & Inquiry Quote Row */}
                   <div className="mt-3 flex items-center justify-between gap-3 border-t border-zinc-800/80 pt-3.5 whitespace-nowrap">
                     <span className="text-xs tabular-nums text-zinc-400 shrink-0">
                       MOQ {product.moq} pcs
                     </span>
-                    <span className="font-display text-sm tabular-nums font-semibold text-white shrink-0">
-                      {product.priceRange} <span className="text-xs font-normal text-zinc-400">/ pc</span>
+                    <span className="font-display text-xs font-semibold text-amber-400 shrink-0">
+                      Quote on Inquiry
                     </span>
                   </div>
 

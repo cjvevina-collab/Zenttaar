@@ -308,11 +308,11 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
             </h1>
           </div>
 
-          {/* Clickable Wholesale Pricing Tiers */}
+          {/* Clickable Volume Tiers (Pricing via Inquiry) */}
           <div className="rounded-lg border border-zinc-800 bg-zinc-950/90 p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
               <span className="text-xs font-semibold text-zinc-300">
-                Wholesale Pricing Tiers (Click to Select)
+                Select Order Volume Tier
               </span>
               <span className="text-[11px] text-amber-400 font-medium">
                 {activeTier.range}
@@ -333,16 +333,15 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
                         : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-600 hover:bg-zinc-900'
                     }`}
                   >
-                    <span className="text-xs font-medium text-zinc-300 tabular-nums whitespace-nowrap">
+                    <span className="text-xs font-semibold text-white tabular-nums whitespace-nowrap">
                       {tier.range}
                     </span>
                     <span
-                      className={`font-display text-base sm:mt-1 font-bold tabular-nums whitespace-nowrap ${
-                        isSelected ? 'text-amber-400' : 'text-white'
+                      className={`text-[11px] sm:mt-1 font-medium whitespace-nowrap ${
+                        isSelected ? 'text-amber-400' : 'text-zinc-400'
                       }`}
                     >
-                      ${tier.price}{' '}
-                      <span className="text-xs font-normal text-zinc-400">/ pc</span>
+                      Inquire for Quote
                     </span>
                   </button>
                 );
@@ -577,14 +576,14 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
             </div>
           </div>
 
-          {/* Quantity & Estimate */}
+          {/* Quantity & Quote Notice */}
           <div className="flex items-center justify-between gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
             <div>
               <label htmlFor="pdp-qty" className="block text-xs font-medium text-zinc-300">
-                Quantity (MOQ {product.moq} · Rate ${activeTier.price}/pc)
+                Order Quantity (MOQ {product.moq} pcs)
               </label>
-              <span className="font-display text-base font-semibold tabular-nums text-amber-400">
-                Est. ${(quantity * activeTier.price).toLocaleString()}
+              <span className="mt-0.5 block text-xs font-medium text-amber-400">
+                Custom pricing shared upon inquiry or contact
               </span>
             </div>
 
@@ -708,8 +707,8 @@ export const SingleProductPage: React.FC<SingleProductPageProps> = ({
                 </div>
                 <div className="mt-2 flex items-center justify-between text-xs tabular-nums text-zinc-400 whitespace-nowrap">
                   <span>MOQ {item.moq} pcs</span>
-                  <span className="font-display text-sm font-semibold text-zinc-100">
-                    {item.priceRange} / pc
+                  <span className="font-display text-xs font-semibold text-amber-400">
+                    Quote on Inquiry
                   </span>
                 </div>
               </div>

@@ -343,12 +343,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       category: 'Hoodies',
       gsm: '500 GSM',
       moq: 50,
-      priceRange: '$20 – $26',
-      basePrice: 23,
+      priceRange: 'Quote on Inquiry',
+      basePrice: 0,
       priceTiers: [
-        { range: '50 – 99 pcs', price: 26 },
-        { range: '100 – 249 pcs', price: 23 },
-        { range: '250+ pcs', price: 20 },
+        { range: '50 – 99 pcs', price: 0 },
+        { range: '100 – 249 pcs', price: 0 },
+        { range: '250+ pcs', price: 0 },
       ],
       leadTime: '18–24 Days',
       fabric: '100% Combed Ring-Spun Cotton Fleece',
@@ -384,6 +384,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       const finalProduct: GarmentProduct = {
         ...editingProduct,
+        priceRange: editingProduct.priceRange?.trim() || 'Quote on Inquiry',
         gallery: editingProduct.image ? [editingProduct.image] : [],
         colorways:
           editingProduct.colorways && editingProduct.colorways.length > 0
@@ -782,24 +783,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white"
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-zinc-300">TikTok URL</label>
-              <input
-                type="url"
-                value={settingsForm.tiktokUrl}
-                onChange={(e) => setSettingsForm({ ...settingsForm, tiktokUrl: e.target.value })}
-                className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-zinc-300">YouTube URL</label>
-              <input
-                type="url"
-                value={settingsForm.youtubeUrl}
-                onChange={(e) => setSettingsForm({ ...settingsForm, youtubeUrl: e.target.value })}
-                className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white"
-              />
-            </div>
           </div>
 
           <button
@@ -1022,13 +1005,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-300">Display Price Range</label>
+                  <label className="block text-xs text-zinc-300">Tag / Collection Label</label>
                   <input
                     type="text"
-                    required
-                    value={editingProduct.priceRange}
+                    value={editingProduct.tag}
                     onChange={(e) =>
-                      setEditingProduct({ ...editingProduct, priceRange: e.target.value })
+                      setEditingProduct({ ...editingProduct, tag: e.target.value })
                     }
                     className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white"
                   />
@@ -1144,7 +1126,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
                   <div className="font-display text-sm font-bold text-white truncate">{p.name}</div>
                   <div className="text-xs text-zinc-400 tabular-nums">
-                    MOQ {p.moq} · {p.priceRange}
+                    MOQ {p.moq} pcs · {p.leadTime}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

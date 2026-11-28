@@ -129,14 +129,6 @@ export default function App() {
     quantity: number,
     customNotes?: string
   ) => {
-    const tiers = product.priceTiers || [];
-    const tierPrice =
-      quantity >= 250 && tiers[2]
-        ? tiers[2].price
-        : quantity >= 100 && tiers[1]
-        ? tiers[1].price
-        : tiers[0]?.price || product.basePrice || 22;
-
     setInquiryItems((prev) => {
       const existing = prev.find(
         (item) =>
@@ -163,7 +155,7 @@ export default function App() {
           colorway,
           technique,
           quantity,
-          unitPriceEstimate: tierPrice,
+          unitPriceEstimate: 0,
           customNotes,
         },
       ];
@@ -258,7 +250,7 @@ export default function App() {
                     <CatalogSection
                       products={products}
                       title="Featured Hoodies & Blanks"
-                      subtitle="Open any silhouette for wholesale pricing tiers and sizing."
+                      subtitle="Open any silhouette to configure custom specs and request a factory quote."
                       limit={6}
                       showViewAllButton
                       onViewAll={() => navigateTo('shop')}

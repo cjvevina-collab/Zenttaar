@@ -40,7 +40,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onNavigate, siteSett
       sections: [
         {
           heading: '01. Quotations & Minimum Order Quantities',
-          body: 'All bulk pricing tiers are quoted per piece FOB Sialkot unless CIF/DDP air freight is explicitly specified. Standard MOQs begin at 50 units per style/colorway (35 units for Melton wool & leather outerwear).',
+          body: 'Custom bulk quotations are prepared upon inquiry FOB Sialkot unless CIF/DDP air freight is explicitly specified. Standard MOQs begin at 50 units per style/colorway (35 units for Melton wool & leather outerwear).',
         },
         {
           heading: '02. Pre-Production Sampling & Approval',

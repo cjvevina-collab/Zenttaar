@@ -34,19 +34,15 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
   if (!isOpen) return null;
 
   const totalUnits = items.reduce((sum, item) => sum + item.quantity, 0);
-  const estimatedSubtotal = items.reduce(
-    (sum, item) => sum + item.quantity * item.unitPriceEstimate,
-    0
-  );
 
   const buildSummaryText = (refId: string) => {
     const lines = items.map(
       (item, i) =>
-        `${i + 1}. ${item.name} | ${item.gsm} | Color: ${item.colorway} | Print/Craft: ${item.technique} | Qty: ${item.quantity} units (~$${item.unitPriceEstimate}/unit)${
+        `${i + 1}. ${item.name} | ${item.gsm} | Color: ${item.colorway} | Print/Craft: ${item.technique} | Qty: ${item.quantity} units${
           item.customNotes ? ` | Notes: ${item.customNotes}` : ''
         }`
     );
-    return `${siteSettings.brandName} Bulk Inquiry [${refId}]\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nTotal Units: ${totalUnits}\n\nItems:\n${lines.join(
+    return `${siteSettings.brandName} Bulk Inquiry [${refId}]\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nTotal Units: ${totalUnits}\nPricing: Requested via Inquiry\n\nItems:\n${lines.join(
       '\n'
     )}`;
   };
@@ -251,8 +247,8 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
                         </button>
                       </div>
 
-                      <span className="font-display text-xs tabular-nums text-zinc-300">
-                        ~${(item.quantity * item.unitPriceEstimate).toLocaleString()}
+                      <span className="text-xs font-medium text-amber-400">
+                        Quote on Inquiry
                       </span>
                     </div>
                   </div>
@@ -269,9 +265,9 @@ export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
             className="border-t border-zinc-800 bg-[#0b0b10] px-6 py-5 space-y-3"
           >
             <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span>Total Units ({items.length} styles)</span>
+              <span>Total Volume ({items.length} styles)</span>
               <span className="font-display tabular-nums font-semibold text-white">
-                {totalUnits} pcs · Est. ${estimatedSubtotal.toLocaleString()}
+                {totalUnits} pcs · Quote Sent on Inquiry
               </span>
             </div>
 

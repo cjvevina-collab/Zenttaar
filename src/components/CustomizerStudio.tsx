@@ -121,12 +121,6 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
   };
 
   const colorLabel = describeColorName(customHex);
-  const volumeDiscount = quantity >= 500 ? 0.85 : quantity >= 250 ? 0.91 : quantity >= 100 ? 0.96 : 1;
-  const trimAdd = selectedTrims.length * 0.75;
-  const washAdd = wash === WASH_FINISHES[0] ? 0 : 2.2;
-  const estimatedUnitPrice = Number(
-    ((silhouette.basePrice + fabric.add + trimAdd + washAdd) * volumeDiscount).toFixed(2)
-  );
 
   const handleAddSpec = () => {
     const item: InquiryItem = {
@@ -140,7 +134,7 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
       colorway: `${colorLabel} · ${wash}`,
       technique,
       quantity,
-      unitPriceEstimate: estimatedUnitPrice,
+      unitPriceEstimate: 0,
       customNotes: `Sizes: ${selectedSizes.join(', ')} · ${
         brandLabelText ? `Brand Label: ${brandLabelText} · ` : ''
       }Trims: ${selectedTrims.join(', ') || 'Standard'}${
@@ -231,19 +225,15 @@ export const CustomizerStudio: React.FC<CustomizerStudioProps> = ({
                 </div>
               </dl>
 
-              <div className="space-y-1.5">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-xs text-zinc-400">Estimated Unit Rate</span>
-                  <span className="font-display text-2xl font-bold tabular-nums text-amber-400 whitespace-nowrap">
-                    ${estimatedUnitPrice.toFixed(2)}{' '}
-                    <span className="text-xs font-normal text-zinc-400">/ pc</span>
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between text-xs">
+                  <span className="text-zinc-400">Batch Volume</span>
+                  <span className="font-display text-base font-bold tabular-nums text-white">
+                    {quantity} pcs
                   </span>
                 </div>
-                <div className="flex items-baseline justify-between text-xs text-zinc-400">
-                  <span>Batch Total ({quantity} pcs)</span>
-                  <span className="font-display tabular-nums font-semibold text-zinc-200">
-                    ${(estimatedUnitPrice * quantity).toLocaleString()}
-                  </span>
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-300 leading-relaxed">
+                  Pricing is calculated per spec and shared once you submit your inquiry or contact our Sialkot desk.
                 </div>
               </div>
             </div>
